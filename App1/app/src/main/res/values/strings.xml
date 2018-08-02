@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">MAGIC EYE</string>
+    <string name="livefeed_string">Live Feed</string>
+    <string name="recording_string">Recordings</string>
+    <string name="images_string">Images</string>
+    <string name="activity_string">Activity</string>
+    <string name="bookmarks_string">Bookmarks</string>
+    <string name="settings_string">Settings</string>
+    <string name="extras_string">Extras</string>
+    <string name="search_string">Search</string>
+    <string name="closeDrawer">Navigation View</string>
+    <string name="openDrawer">Navigation View Closed</string>
+    <string name="btn_custom">Button in custom layout</string>
+</resources>

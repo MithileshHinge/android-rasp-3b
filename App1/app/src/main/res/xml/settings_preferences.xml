@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="General Settings">
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="key2"
+            android:title="Device IP Address"
+            android:summary="EditText Summary"
+            android:dialogMessage="Dialog Message"
+            android:defaultValue="192.168.1.105" />
+
+        <android.support.v7.preference.ListPreference
+            android:key="key4"
+            android:title="Security MODE"
+            android:summary="ListPreference summary"
+            android:entries="@array/listentries"
+            android:entryValues="@array/listvalues"
+            />
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="key1"
+            android:title="Mobile Notifications"
+            android:summary="Control Mobile Notification Service"
+            android:defaultValue="false" />
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="key5"
+            android:title="Email Notifications"
+            android:summary="Control Email Service"
+            android:defaultValue="false" />
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Account Settings">
+        <android.support.v7.preference.EditTextPreference
+            android:key="keyy1"
+            android:title="Username"
+            android:summary="Set username "
+            android:dialogMessage="Dialog Message"
+            android:defaultValue=""
+            android:enabled="false"/>
+
+        <!--android.support.v7.preference.EditTextPreference
+            android:key="keyy2"
+            android:title="Password"
+            android:summary="Set password"
+            android:dialogMessage="Dialog Message"
+            android:defaultValue="Default value" /-->
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="keyy3"
+            android:title="Email Id"
+            android:summary="Set Email Id"
+            android:dialogMessage="Dialog Message"
+            android:defaultValue=""
+            android:enabled="false"/>
+
+    </android.support.v7.preference.PreferenceCategory>
+</android.support.v7.preference.PreferenceScreen>

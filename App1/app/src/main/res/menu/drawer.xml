@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/livefeed"
+            android:checked="false"
+            android:icon="@drawable/ic_videocam_black_24px"
+            android:title="@string/livefeed_string" />
+
+        <item
+            android:id="@+id/recordings"
+            android:checked="false"
+            android:icon="@drawable/ic_play_circle_filled_black_24px"
+            android:title="@string/recording_string" />
+
+        <item
+            android:id="@+id/images"
+            android:checked="false"
+            android:icon="@drawable/ic_image_black_24px"
+            android:title="@string/images_string" />
+
+        <item
+            android:id="@+id/activity"
+            android:checked="false"
+            android:icon="@drawable/ic_supervisor_account_black_24px"
+            android:title="@string/activity_string" />
+
+
+        <item
+            android:id="@+id/bookmarks"
+            android:checked="false"
+            android:icon="@drawable/ic_bookmark_black_24px"
+            android:title="@string/bookmarks_string" />
+        <item
+            android:id="@+id/settings"
+            android:checked="false"
+            android:icon="@drawable/ic_build_black_24px"
+            android:title="@string/settings_string" />
+        <item
+            android:id="@+id/extras"
+            android:checked="false"
+            android:icon="@drawable/ic_wallpaper_black_24px"
+            android:title="@string/extras_string" />
+
+    </group>
+</menu>

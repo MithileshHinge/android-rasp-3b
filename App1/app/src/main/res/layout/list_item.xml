@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:id="@+id/item_img"
+        android:layout_margin="1dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"/>
+    <ToggleButton
+        android:shape="oval"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:button="@drawable/star"
+        android:id = "@+id/BookMark_btn"
+        android:background="@null"
+        android:textOn=""
+        android:textOff=""
+        android:layout_alignBottom="@+id/item_img"
+        android:layout_alignRight="@+id/item_img"/>
+    
+</RelativeLayout>
