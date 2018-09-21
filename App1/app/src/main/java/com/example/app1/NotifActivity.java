@@ -43,9 +43,10 @@ public class NotifActivity extends AppCompatActivity {
     private static SharedPreferences spref_ip;
 
     public static String filename;
+    public int PortVdo = 7668;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notif);
         context = getApplicationContext();
@@ -85,14 +86,20 @@ public class NotifActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                Socket socketVdo = new Socket(servername, 6668);
+                                /*SocketAddress address = new InetSocketAddress(servername,PortVdo);
+                                SocketChannel clientChannel = SocketChannel.open(address);
+                                Socket socketVdo = clientChannel.socket();*/
+                                Socket socketVdo = new Socket(servername, PortVdo);
+                                System.out.println("...vdo socket connected...");
                                 OutputStream outVdo = socketVdo.getOutputStream();
                                 DataOutputStream doutVdo = new DataOutputStream(outVdo);
                                 doutVdo.writeInt(videoNotifID);
                                 doutVdo.flush();
 
+
                                 InputStream inVdo = socketVdo.getInputStream();
                                 DataInputStream dInVdo = new DataInputStream(inVdo);
+
                                 int filenameSize = dInVdo.readInt();
                                 byte[] filenameInBytes = new byte[filenameSize];
                                 outVdo.write(1);
