@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class Client extends Thread {
             socket.setSoTimeout(500);
             udpSocket = new DatagramSocket();
 
-            byte[] handshakeBuf = new byte[256];
+            /*byte[] handshakeBuf = new byte[256];
             DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
             while(true) {
                 System.out.println("Sending handshake....");
@@ -54,7 +55,16 @@ public class Client extends Thread {
                 } catch (SocketTimeoutException e){
                     e.printStackTrace();
                 }
+            }*/
+            DataOutputStream dout = new DataOutputStream(socket.getOutputStream());
+            dout.writeInt(udpSocket.getLocalPort());
+            dout.flush();
+
+            if (socket.getInputStream().read() != 1){
+                Log.d("System is offline!!!!", "");
+                return;
             }
+
             while (true) {
 
                 byte[] buf = new byte[64000];
