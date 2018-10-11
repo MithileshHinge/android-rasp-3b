@@ -3,7 +3,6 @@ package com.example.app1;
 /**
  * Created by Home on 10-07-2017.
  */
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.support.v7.preference.PreferenceManager;
@@ -13,7 +12,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
@@ -56,12 +54,14 @@ public class Client extends Thread {
                     e.printStackTrace();
                 }
             }*/
-            DataOutputStream dout = new DataOutputStream(socket.getOutputStream());
-            dout.writeInt(udpSocket.getLocalPort());
-            dout.flush();
 
-            if (socket.getInputStream().read() != 1){
-                Log.d("System is offline!!!!", "");
+            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+            dOut.writeInt(udpSocket.getLocalPort());
+            dOut.flush();
+            int m = socket.getInputStream().read();
+            if( m != 1){
+                Log.d("System is offline","");
+                System.out.println("............client received = "+ m);
                 return;
             }
 

@@ -49,7 +49,7 @@ public class LivefeedFragment extends Fragment {
     public byte[] buffer;
     public static int p;
     public static DatagramSocket AudioSocket;
-    private int AudioPort = 7671;
+    private int AudioPort = 7671, AudioTcpPort = 7670;
 
     static AudioRecord recorder;
     private int sampleRate = 44100;
@@ -62,7 +62,7 @@ public class LivefeedFragment extends Fragment {
     private static SharedPreferences spref_ip;
 
     private static int msgPort = 7676;
-    public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2;
+    public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13;
 
     @Nullable
     @Override
@@ -138,7 +138,10 @@ public class LivefeedFragment extends Fragment {
                         @Override
                         public void run() {
                             try{
-                                handshake_socket = new Socket(servername, 6670);
+                                System.out.println(".............voice button cliked...!!!");
+                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
+                                handshake_socket = new Socket(servername, AudioTcpPort);
+                                System.out.println(".............audio tcp port connected...!!!");
                                 OutputStream out = handshake_socket.getOutputStream();
                                 out.write(1);
                                 out.flush();
@@ -189,11 +192,11 @@ public class LivefeedFragment extends Fragment {
                         if(isChecked){
                             while (!LivefeedFragment.sendMsg(BYTE_START_ALARM)){}
                             System.out.println(".................ALARM BUTTON PRESSED............");
-                            Toast.makeText(v.getContext(), "Alarm Blown !", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(v.getContext(), "Alarm Blown !", Toast.LENGTH_LONG).show();
                         }else{
                             while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){}
                             System.out.println("....alarm off");
-                            Toast.makeText(v.getContext(), "Alarm Stopped !", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(v.getContext(), "Alarm Stopped !", Toast.LENGTH_LONG).show();
                         }
                     }
                 }).start();
@@ -306,13 +309,16 @@ public class LivefeedFragment extends Fragment {
     public static boolean sendMsg(int p){
         Socket msgSocket;
         try {
-            msgSocket = new Socket(LivefeedFragment.servername, msgPort);
+            //spref_ip = PreferenceManager.getDefaultSharedPreferences(this);
+            //servername = spref_ip.getString("ip_address","");
+            System.out.println(".........into send msg................. with servername = "+ MainActivity.serverName);
+            msgSocket = new Socket(MainActivity.serverName, msgPort);
             OutputStream out =  msgSocket.getOutputStream();
             InputStream in = msgSocket.getInputStream();
             out.write(p);
             out.flush();
             in.read();
-
+            System.out.println(".............byte sent...........");
             try{
                 msgSocket.close();
             }catch (IOException e){
