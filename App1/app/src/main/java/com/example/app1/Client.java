@@ -3,16 +3,15 @@ package com.example.app1;
 /**
  * Created by Home on 10-07-2017.
  */
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
@@ -43,7 +42,7 @@ public class Client extends Thread {
             socket.setSoTimeout(500);
             udpSocket = new DatagramSocket();
 
-            byte[] handshakeBuf = new byte[256];
+            /*byte[] handshakeBuf = new byte[256];
             DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
             while(true) {
                 System.out.println("Sending handshake....");
@@ -54,7 +53,19 @@ public class Client extends Thread {
                 } catch (SocketTimeoutException e){
                     e.printStackTrace();
                 }
+            }*/
+
+            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+            dOut.writeInt(udpSocket.getLocalPort());
+            dOut.flush();
+            int m = socket.getInputStream().read();
+            if( m != 1){
+                Log.d("System is offline","");
+                System.out.println("............client received = "+ m);
+                return;
             }
+
+
             while (true) {
 
                 byte[] buf = new byte[64000];

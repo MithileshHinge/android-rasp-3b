@@ -50,8 +50,10 @@ public class MainActivity extends AppCompatActivity {
     public static BookmarkedDatabaseHandler bookmarkedDatabaseHandler;
     private static String  TAG = "Permsission : ";
     private static boolean write_permission;
+    public static String serverName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        serverName = RegistrationActivity.serverName;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ActivityLogFragment activityLogFragment = new ActivityLogFragment();
@@ -358,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(intent);
         finish();
+        LoginActivity.toBeVerified = true;
     }
 }
 

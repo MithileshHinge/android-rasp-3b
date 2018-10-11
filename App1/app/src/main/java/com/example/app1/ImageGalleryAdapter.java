@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -262,19 +263,27 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                 try {
                     int itemPosition;
                     String imgUrl;
+                    Uri imgURI;
                     System.out.println("...................onClick madhe ghusla.................");
                     switch (classSelector) {
                         case 1:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);
                             imgUrl = ImageFragment.data.get(itemPosition).getUrl();
+                            System.out.println("URI : " + context.getApplicationContext().getPackageName()+ ".provider");
+                            System.out.println("External Dir : " + ImageFragment.imageStorageDir.toString());
+                            imgURI = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName() + ".provider", new File(imgUrl));
+
                             Log.d("ONCLICK", imgUrl);
-                            galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "image/*");
+                            //galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "image/*");
+                            galleryIntent.setDataAndType(imgURI, "image/*");
                             break;
                         case 2:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);
                             imgUrl = RecordingFragment.data.get(itemPosition).getUrl();
+                            imgURI = FileProvider.getUriForFile(context,RecordingFragment.vdoDirectory.getAbsolutePath().toString(),new File(imgUrl));
                             System.out.println("ONCLICK" + imgUrl);
-                            galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video/*");
+                            /*galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video*//*");*/
+                            galleryIntent.setDataAndType(imgURI, "video/*");
                             break;
                         case 3:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);  //change

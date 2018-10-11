@@ -10,7 +10,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,14 +37,15 @@ public class NotifActivity extends AppCompatActivity {
     public static VideoView jVV;
     private static int videoNotifID;
     public static Context context;
-    public static String servername;
+    //public static String servername;
     private Toolbar toolbar;
     private static SharedPreferences spref_ip;
 
     public static String filename;
+    public int PortVdo = 7668;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notif);
         context = getApplicationContext();
@@ -54,9 +54,7 @@ public class NotifActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.parseColor("#F7E7CE"));
 
-        spref_ip = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        servername = spref_ip.getString("ip_address","");
-        System.out.println("........................servername  " + servername);
+        System.out.println("........................servername  " + RegistrationActivity.serverName);
 
         Intent intent = getIntent();
         String imageName = intent.getStringExtra("image_name");
@@ -85,14 +83,20 @@ public class NotifActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                Socket socketVdo = new Socket(servername, 6668);
+                                /*SocketAddress address = new InetSocketAddress(servername,PortVdo);
+                                SocketChannel clientChannel = SocketChannel.open(address);
+                                Socket socketVdo = clientChannel.socket();*/
+                                Socket socketVdo = new Socket(RegistrationActivity.serverName, PortVdo);
+                                System.out.println("...vdo socket connected...");
                                 OutputStream outVdo = socketVdo.getOutputStream();
                                 DataOutputStream doutVdo = new DataOutputStream(outVdo);
                                 doutVdo.writeInt(videoNotifID);
                                 doutVdo.flush();
 
+
                                 InputStream inVdo = socketVdo.getInputStream();
                                 DataInputStream dInVdo = new DataInputStream(inVdo);
+
                                 int filenameSize = dInVdo.readInt();
                                 byte[] filenameInBytes = new byte[filenameSize];
                                 outVdo.write(1);

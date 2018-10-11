@@ -20,7 +20,7 @@ import java.net.Socket;
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static int i = 1;
     public boolean switched;
-    private static int msgPort = 6676;
+    private static int msgPort = 7676;
     private String servername;
     public SharedPreferences spref_ip;
     byte BYTE_SURV_MODE_ON = 1, BYTE_SURV_MODE_OFF = 3, BYTE_EMAIL_NOTIF_ON = 9, BYTE_EMAIL_NOTIF_OFF = 10;
@@ -31,6 +31,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         // Load the Preferences from the XML file
         addPreferencesFromResource(R.xml.settings_preferences);
 
+        spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
+        servername = spref_ip.getString("ip_address","");
 
         Preference p = getPreferenceScreen().findPreference("key2");
         if (p instanceof EditTextPreference) {
@@ -230,14 +232,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 SwitchPreferenceCompat switchPreferenceCompat = (SwitchPreferenceCompat)p6;
                 switched = (switchPreferenceCompat).isChecked();
                 if(switched){
-                    //Toast.makeText(getContext(), "Switch onnnn", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Mobile Notification started", Toast.LENGTH_SHORT).show();
                     getActivity().startService(new Intent(getActivity(),NotifyService.class));
+                    System.out.println(".........Notify service started.................");
                 }else{
-                    //Toast.makeText(getContext(), "Switch off", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Mobile Notification stopped", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent();
                     intent.setAction(NotifyService.ACTION);
                     intent.putExtra("RQS", NotifyService.RQS_STOP_SERVICE);
                     getActivity().sendBroadcast(intent);
+                    System.out.println(".........Notify service stopped.................");
                 }
             }
 
@@ -273,7 +277,5 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             }
 
         }
-
     }
-
 }
