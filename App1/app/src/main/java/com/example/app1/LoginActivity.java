@@ -5,7 +5,6 @@ package com.example.app1;
  */
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,17 +14,14 @@ import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import butterknife.ButterKnife;
@@ -37,27 +33,30 @@ public class LoginActivity extends AppCompatActivity {
 
     public static String username;
     public static String password;
-    public static String email;
     public static SharedPreferences spref_user,spref_email;
     private static SharedPreferences loggedIn;
     boolean check2 = false;
-    public static boolean toBeVerified = false , createFile;    //toBeVerified is set true when user logs out from app
+    //public static boolean toBeVerified = false , createFile;    //toBeVerified is set true when user logs out from app
+    public static boolean createFile;
     public static int i;
-    private static Socket connServerSocket;
+    public static Socket connServerSocket;
     public static InputStream in;
     public static OutputStream out;
 
-    @InjectView(R.id.input_email) EditText _emailText;
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_login) Button _loginButton;
+    @InjectView(R.id.loggedIn) CheckBox _loggedIn;
     @InjectView(R.id.input_username) EditText _usernameText;
 
     //TODO : Remove this portion ; just for testing
 
-    public static boolean validate1Done = false,validate2Done = false;
-    public int connServerPort = 7660;
-    String regID;
+    //public static boolean validate1Done = false,validate2Done = false;
+    public static int validate1Done = 3;    //if registered properly = 1; if wrong registration = 2; else default 3
+    public static int connServerPort = 7660;
+    String hashID;
     public static String serverName;
+    public static long timeDisableLoginStart, timeDisableLoginEnd;
+    private Product product;
 
     //TODO : Remove this portion ; just for testing
 
@@ -66,31 +65,72 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_screen);
         ButterKnife.inject(this);
+
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
+        for (Product product : RegistrationActivity.allProducts) {
+            if(product.getName() == RegistrationActivity.clickedItem) {
+                hashID = product.getHashID();
+                this.product = product;
+            }
+        }
+        System.out.println("reg id = "+ hashID);
         serverName = RegistrationActivity.serverName;
-        loggedIn = getApplicationContext().getSharedPreferences("myPref",0);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("...connecting server socket...");
+                    connServerSocket = new Socket(serverName,connServerPort);
+                    // Sending Reg ID
+                    DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
+                    dOut.writeUTF(hashID);
+                    int i = connServerSocket.getInputStream().read();
+                    System.out.println("....registration variable = "+i);
+                    if(i==5) {
+                        System.out.println(".......1........");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getBaseContext(), "System not registered.", Toast.LENGTH_LONG).show();
+                                System.out.println(".......2........");
+                            }
+                        });
+                    } else if(i == 1) {
+                        System.out.println(".......3........");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getBaseContext(), "System already registered.", Toast.LENGTH_LONG).show();
+                                System.out.println("............4............");
+                            }
+                        });
+
+                    }
+                    System.out.println("...thread sending reg id ends...");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        if(product.getIfLoggedIn()){
+            _usernameText.setText(product.getUsername());
+            _passwordText.setText(product.getPassword());
+            _loggedIn.setChecked(true);
+        }
+
+        /*loggedIn = getApplicationContext().getSharedPreferences("myPref",0);
         check2 = loggedIn.getBoolean("auto_login",false);
         System.out.println("check boolean of login = "+check2);
         check2 = false;     //just for testing purpose. To be removed!!!
         if(check2) {
-            _loginButton.setEnabled(true);
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivityForResult(intent, REQUEST_SIGNUP);
             finish();
-        }
-
-        connServerSocket = SocketHandler.getSocket();
-        try {
-            in = connServerSocket.getInputStream();
-            out = connServerSocket.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NullPointerException n ){
-            n.printStackTrace();
-        }
+        }*/
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 login();
@@ -102,18 +142,30 @@ public class LoginActivity extends AppCompatActivity {
     public void login() {
         Log.d(TAG, "Login");
 
-        validate();
-        if(toBeVerified) {
-            if (!validate1Done) {
-                onLoginFailed();
-                return;
-            }
-        }else {
-            while (!validate1Done) {
-                System.out.println("..");
-            }
+        if(!checkCredentials()) {
+            onLoginFailed();
+            return;
         }
-        validate1Done = false;
+
+        product.setUsername(username);
+        product.setPassword(password);
+
+        if(_loggedIn.isChecked())
+            product.setIfLoggedIn(true);
+        else
+            product.setIfLoggedIn(false);
+
+
+        System.out.println(".....credentials done");
+        validate();
+        System.out.println(".....validation done");
+        while (validate1Done == 3) {
+        }
+        if (validate1Done == 2)
+            return;
+        validate1Done = 3;
+
+        System.out.println("...value of validate1Done = "+validate1Done);
 
         new Thread(new Runnable() { 
             @Override
@@ -132,7 +184,8 @@ public class LoginActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-                    }
+                    } else
+                        System.out.println("...system offline...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -143,12 +196,12 @@ public class LoginActivity extends AppCompatActivity {
 
         _loginButton.setEnabled(false);
 
+        System.out.println("...authenticating process started...");
         final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
                 R.style.AppTheme);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
-        email = _emailText.getText().toString();
         password = _passwordText.getText().toString();
         username = _usernameText.getText().toString();
 
@@ -156,10 +209,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor edit2 = spref_user.edit();
         edit2.putString("username",username);
         edit2.commit();
-        spref_email = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit3 = spref_email.edit();
-        edit3.putString("email_id",email);
-        edit3.commit();
+
         // TODO: Implement your own authentication logic here.
 
         new android.os.Handler().postDelayed(
@@ -222,207 +272,119 @@ public class LoginActivity extends AppCompatActivity {
 
     public void validate() {
         username = _usernameText.getText().toString();
-        email = _emailText.getText().toString();
         password = _passwordText.getText().toString();
 
-        while(true) {
-            boolean exit = true;
-            if (username.isEmpty() || username.length() < 4 || username.length() > 10) {
-                _usernameText.setError("between 4 and 10 alphabets");
-                exit = false;
-            } else {
-                _usernameText.setError(null);
-            }
-            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                _emailText.setError("enter a valid email address");
-                exit = false;
-            } else {
-                _emailText.setError(null);
-            }
-            if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-                _passwordText.setError("between 4 and 10 alphanumeric characters");
-                exit = false;
-            } else {
-                _passwordText.setError(null);
-            }
-            if(exit) {
-                System.out.println(".....formats acceptable.....");
-                break;
-            }
-        }
-        if(toBeVerified){
-            //TODO - verification process
-            System.out.println("Username : " + readusername(getApplicationContext()) + "    Password : " + readpassword(getApplicationContext()));
-            System.out.println("Username typed : " + username + "    Password typed: " + password);
+        System.out.println("...........Sending username password to server");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("...starting thread to send username and password...");
+                //i = 0;
+                try {
+                    // Sending Username and Password
+                    in = connServerSocket.getInputStream();
+                    out = connServerSocket.getOutputStream();
+                    DataOutputStream dOut = new DataOutputStream(out);
+                    dOut.writeUTF(username);
+                    dOut.flush();
+                    dOut.writeUTF(password);
+                    dOut.flush();
+                    System.out.println("username and password flushed   "+username+"   "+password);
+                    //To be removed!! hard coded fcm reg token!!
+                    /*MyFirebaseInstanceIDService.refreshedToken = "cOFUjRSeIyc:APA91bGa-bfU4c5B76Q-LgeZo1OLtYYmuLVVGw-eEBVqyP3-1vx_UYIQ3Nj54jPoxFjs95FGV04h-kMdEjdqW6fflU8UMwakKZ48SRqeo49WP8xJNq9RXmOo64QxNtEWU8tUiNqI_o5n";
+                    dOut.writeUTF(MyFirebaseInstanceIDService.refreshedToken);
+                    dOut.flush();*/
 
-            if (username.equals(readusername(getApplicationContext()))) {
-                if (password.equals(readpassword(getApplicationContext()))) {
-                    validate1Done = true;
-                    System.out.println("Validation Done!!!");
-                } else {
-                    _passwordText.setError("Incorrect Password");
-                    System.out.println(".........incorrect password");
-                    _passwordText.setText("");
-                }
-            } else {
-                _usernameText.setError("Incorrect Username");
-                System.out.println(".........incorrect username");
-                _usernameText.setText("");
-            }
-            _loginButton.setEnabled(true);
+                    i = in.read();
+                    System.out.println("................");
+                    /*out.write(0);   //handshake after receiving the registration status from server
+                    out.flush();*/
 
-        }else {
-            if(createFile){
-                System.out.println("Writing username password");
-                writeusername(username,getApplicationContext());
-                writepassword(password,getApplicationContext());
-            }
-            System.out.println("Sending username password to server");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    i = 0;
-                    try {
-                        do {
-                            DataOutputStream dOut = new DataOutputStream(out);
-                            dOut.writeUTF(LoginActivity.username);
-                            dOut.flush();
-                            dOut.writeUTF(LoginActivity.password);
-                            dOut.flush();
-                            //To be removed!! hard coded fcm reg token!!
-                            MyFirebaseInstanceIDService.refreshedToken = "cOFUjRSeIyc:APA91bGa-bfU4c5B76Q-LgeZo1OLtYYmuLVVGw-eEBVqyP3-1vx_UYIQ3Nj54jPoxFjs95FGV04h-kMdEjdqW6fflU8UMwakKZ48SRqeo49WP8xJNq9RXmOo64QxNtEWU8tUiNqI_o5n";
-                            dOut.writeUTF(MyFirebaseInstanceIDService.refreshedToken);
-                            dOut.flush();
+                    //validate1Done = true;
+                    System.out.println("....login variable = " + i);
 
-                            i = in.read();
-                            out.write(0);   //handshake after receiving the registration status from server
-                            out.flush();
-
-                            validate1Done = true;
-                            System.out.println("....login variable = " + i);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (i == 2) {
-                                        Toast.makeText(getBaseContext(), "Registered", Toast.LENGTH_LONG).show();
-                                    } else if (i == 4) {
-                                        Toast.makeText(getBaseContext(), "Invalid Username or Password. Try Again !", Toast.LENGTH_LONG).show();
-                                    } else if (i == 3) {
-                                        Toast.makeText(getBaseContext(), "Maximum number of failed login attempts reached !", Toast.LENGTH_LONG).show();
-                                    } else if (i == 6) {
-                                        Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
-                                    } else if (i == 7) {
-                                        Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             if (i == 2) {
-                                //Toast.makeText(getBaseContext(), "Registered", Toast.LENGTH_LONG).show();
-                                break;
+                                Toast.makeText(getBaseContext(), "Registered", Toast.LENGTH_LONG).show();
                             } else if (i == 4) {
-                                //Toast.makeText(getBaseContext(), "Invalid Username or Password. Try Again !", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getBaseContext(), "Invalid Username or Password. Try Again !", Toast.LENGTH_LONG).show();
                             } else if (i == 3) {
-                                //Toast.makeText(getBaseContext(), "Maximum number of failed login attempts reached !", Toast.LENGTH_LONG).show();
+                                disableLogin();
+                                Toast.makeText(getBaseContext(), "Maximum number of failed login attempts reached !", Toast.LENGTH_LONG).show();
                             } else if (i == 6) {
-                                //Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
-                                break;
+                                Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
                             } else if (i == 7) {
-                                //Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
-                                break;
-                            } else {
-                                break;
+                                Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
                             }
-                            if (in.read() == 8) {
-                                //Toast.makeText(getBaseContext(), "System is offline", Toast.LENGTH_LONG).show();
-                                System.out.println("..............System is offline..................");
-                            }
-                        } while (i != 3);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (NullPointerException n) {
-                        n.printStackTrace();
+                        }
+                    });
+
+                    if(i == 2 || i==6)
+                        validate1Done = 1;
+                    else {
+                        onLoginFailed();
+                        validate1Done = 2;
+                        return;
                     }
+                    System.out.println("....thread on its last stage...");
+                    /*if (in.read() == 8) {
+                        //Toast.makeText(getBaseContext(), "System is offline", Toast.LENGTH_LONG).show();
+                        System.out.println("..............System is offline..................");
+                    }*/
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException n) {
+                    n.printStackTrace();
                 }
-            }).start();
-        }
-    }
-    private void writeusername(String data,Context context) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("username.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-    private void writepassword(String data,Context context) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("password.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-    private String readusername(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("username.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
             }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
+        }).start();
     }
-    private String readpassword(Context context) {
 
-        String ret = "";
+    public boolean checkCredentials(){
+        boolean checked = true;
+        username = _usernameText.getText().toString();
+        password = _passwordText.getText().toString();
 
-        try {
-            InputStream inputStream = context.openFileInput("password.txt");
+        if (username.isEmpty() || username.length() < 4 || username.length() > 10) {
+            _usernameText.setError("between 4 and 10 alphabets");
+            System.out.println("...username invalid");
+            checked = false;
+        } else
+            _usernameText.setError(null);
 
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
+        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
+            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            System.out.println("...password invalid");
+            checked = false;
+        } else
+            _passwordText.setError(null);
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
+        //System.out.println(".........credentials validated");
 
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
+        return checked;
     }
+
+    public void disableLogin(){
+        timeDisableLoginStart = System.currentTimeMillis();
+        timeDisableLoginEnd = timeDisableLoginStart+30000;
+
+        Toast.makeText(getBaseContext(), "Login disabled for 5 mins", Toast.LENGTH_LONG).show();
+
+        _loginButton.setText("Login disabled for 5 mins");
+        _loginButton.setEnabled(false);
+
+        new android.os.Handler().postDelayed(
+                new Runnable() {
+                    public void run() {
+                        System.out.println("timer ended");
+                        _loginButton.setText("Login");
+                        Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
+                        startActivityForResult(intent, REQUEST_SIGNUP);
+                    }
+                },30000);
+
+    }
+
 }

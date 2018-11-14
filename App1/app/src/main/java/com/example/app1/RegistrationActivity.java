@@ -1,208 +1,127 @@
 package com.example.app1;
 
-import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-
-/**
- * Created by isha sagote on 23-09-2018.
- */
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegistrationActivity extends AppCompatActivity {
-     private static final String TAG = "RegistrationActivity";
-    private static final int REQUEST_SIGNUP = 0;
 
-    public static String regID;
-
-    private static SharedPreferences spref_regID;
-    private static SharedPreferences registeredIn;
-
-    private static Socket connServerSocket;
-    public int connServerPort = 7660;
-    public static SharedPreferences spref_ip;
-    public static String serverName = "192.168.1.102";
-    public static boolean valid;
-    public static boolean validateDone = false;
-
-    @InjectView(R.id.btn_register) Button _registerButton;
-    @InjectView(R.id.input_regID) EditText _regID;
-    @InjectView(R.id.input_serverName) EditText _serverName;
+    public static String serverName = "192.168.1.106";
+    public static RecyclerView productView;
+    public static List<Product> allProducts = new ArrayList<>();
+    public static String clickedItem;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.registration_screen);
-        ButterKnife.inject(this);
-        registeredIn = PreferenceManager.getDefaultSharedPreferences(this);
-        System.out.println("registration activity started");
-        boolean check = registeredIn.getBoolean("auto_login",false);
-        System.out.println("check boolean of registration = "+check);
-        check = false;      //just for testing purpose. To be removed!!!
-        if(check) {
-            _registerButton.setEnabled(true);
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivityForResult(intent, REQUEST_SIGNUP);
-            finish();
+
+        //FrameLayout fLayout = (FrameLayout) findViewById(R.id.activity_to_do);
+
+        productView = (RecyclerView)findViewById(R.id.product_list);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        productView.setLayoutManager(linearLayoutManager);
+        productView.setHasFixedSize(true);
+        System.out.println("........Reg activity started........");
+        for (Product fileEntry : allProducts) {
+            System.out.println(fileEntry.getName() +"........" + fileEntry.getHashID());
         }
 
-        _registerButton.setOnClickListener(new View.OnClickListener() {
+        //TODO: reproduce the stored allProducts
 
+        if(allProducts.size() > 0){
+            System.out.println(".......Products are there.........");
+            productView.setVisibility(View.VISIBLE);
+            ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+            productView.setAdapter(mAdapter);
+
+        }else {
+            System.out.println("........No products........");
+            productView.setVisibility(View.INVISIBLE);
+            Toast.makeText(this, "There is no product in the database. Start adding now", Toast.LENGTH_LONG).show();
+        }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.addProduct);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                System.out.println("clicked on register button");
-                register();
+            public void onClick(View view) {
+                // add new quick task
+                addTaskDialog();
+            }
+        });
+    }
+
+    public void proceed(){
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivityForResult(intent, 0);
+        finish();
+    }
+
+    private void addTaskDialog(){
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View subView = inflater.inflate(R.layout.add_product_layout, null);
+
+        final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
+        final EditText quantityField = (EditText)subView.findViewById(R.id.enter_quantity);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add new product");
+        builder.setView(subView);
+        builder.create();
+
+        builder.setPositiveButton("ADD PRODUCT", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String name = nameField.getText().toString();
+                final String quantity = quantityField.getText().toString();
+
+                if(TextUtils.isEmpty(name) || quantity.length() <= 0){
+                    Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Product newProduct = new Product(name, quantity);
+                    allProducts.add(newProduct);
+                    newProduct.setIfLoggedIn(false);
+
+                    //TODO: store allProducts
+
+                    Intent t= new Intent(RegistrationActivity.this,RegistrationActivity.class);
+                    startActivity(t);
+                    finish();
+                    System.out.println("........product added........");
+                    //finish();
+                }
             }
         });
 
-    }
-
-    public void register() {
-        Log.d(TAG, "Register");
-
-        validate();
-        while(!validateDone)   {}
-        validateDone = false;
-
-        System.out.println("......registration validated......");
-        LoginActivity.createFile = true;
-        _registerButton.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity.this,
-                R.style.AppTheme);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Registering...");
-        progressDialog.show();
-        //regID = _regID.getText().toString();
-        spref_regID = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit = spref_regID.edit();
-        edit.putString("regID",regID);
-        edit.commit();
-
-        regID = "2eab13847fe70c2e59dc588f299224aa";
-
-        // TODO: Implement your own authentication logic here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onRegistrationSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(RegistrationActivity.this, "Task cancelled", Toast.LENGTH_LONG).show();
+            }
+        });
+        builder.show();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SIGNUP) {
-            if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
-            }
-        }
+    protected void onDestroy() {
+        super.onDestroy();
+        /*if(mDatabase != null){
+            mDatabase.close();
+        }*/
     }
-
-    boolean doubleBackToExitPressedOnce = false;
-
-    public void onBackPressed(){
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
-
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce=false;
-            }
-        }, 2000);
-    }
-    public void onRegistrationSuccess() {
-        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-        startActivityForResult(intent, REQUEST_SIGNUP);
-        _registerButton.setEnabled(true);
-        registeredIn = PreferenceManager.getDefaultSharedPreferences(this);
-        registeredIn.edit().putBoolean("auto_login",true).apply();
-        finish();
-        System.out.println(".......registration success.....");
-    }
-
-    public void onRegistrationFailed() {
-        Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
-        _registerButton.setEnabled(true);
-    }
-
-    public void validate() {
-
-        regID = "2eab13847fe70c2e59dc588f299224aa";     // to be removed!! hard coded registration hash id
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connServerSocket = new Socket(serverName, connServerPort);
-                    SocketHandler.setSocket(connServerSocket);
-                    DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
-                    dOut.writeUTF(RegistrationActivity.regID);
-                    int i = connServerSocket.getInputStream().read();
-
-                    System.out.println("....registration variable = "+i);
-                    if(i==5) {
-                        System.out.println(".......1........");
-                        validateDone = true;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getBaseContext(), "System not registered.", Toast.LENGTH_LONG).show();
-                                System.out.println(".......2........");
-                            }
-                        });
-                    } else if(i == 1) {
-                        System.out.println(".......3........");
-                        validateDone = true;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getBaseContext(), "System already registered.", Toast.LENGTH_LONG).show();
-                                System.out.println("............4............");
-                            }
-                        });
-
-                    } else
-                        _regID.setError(null);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                    onRegistrationFailed();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    onRegistrationFailed();
-                }
-            }
-        }).start();
-    }
-
 }
