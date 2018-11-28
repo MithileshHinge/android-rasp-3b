@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -21,9 +20,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -146,7 +142,7 @@ public class NotifyService extends FirebaseMessagingService {
                         _name = "Abrupt end of activity.";
                     }
                     if(p==BYTE_FACEFOUND_VDOGENERATING || p== BYTE_ALERT1) {
-                        Socket socketFrame = new Socket(servername, PORT_NOTIF_FRAME);
+                        /*Socket socketFrame = new Socket(servername, PORT_NOTIF_FRAME);
                         System.out.println("............FRAME SOCKET........");
                         InputStream inFrame = socketFrame.getInputStream();
                         final Bitmap notifFrame = BitmapFactory.decodeStream(new FlushedInputStream(inFrame));
@@ -156,14 +152,14 @@ public class NotifyService extends FirebaseMessagingService {
                         imageName = getCurrentTimeStamp();
                         saveImage(notifFrame, imageName);
 
-                        firstNotifIntent.putExtra("image_name", imageName);
+                        firstNotifIntent.putExtra("image_name", imageName);*/
 
                         int requestID = (int) System.currentTimeMillis();
                         PendingIntent firstPendingIntent = PendingIntent.getActivity(context, requestID, firstNotifIntent, 0);
                         notifBuilder.setContentIntent(firstPendingIntent);
 
-                        NotificationCompat.BigPictureStyle bps = new NotificationCompat.BigPictureStyle().bigPicture(notifFrame);
-                        notifBuilder.setStyle(bps);
+                        /*NotificationCompat.BigPictureStyle bps = new NotificationCompat.BigPictureStyle().bigPicture(notifFrame);
+                        notifBuilder.setStyle(bps);*/
 
 
                         /*if (NotifActivity.jIV != null) {
@@ -218,9 +214,6 @@ public class NotifyService extends FirebaseMessagingService {
                         //db.addRow(new DatabaseRow(_name,date, 0 , null));
                     }
 
-
-                } catch (IOException e) {
-                    e.printStackTrace();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
