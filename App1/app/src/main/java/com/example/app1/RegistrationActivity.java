@@ -2,6 +2,7 @@ package com.example.app1;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -15,14 +16,20 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    public static String serverName = "192.168.1.106";
+    public static String serverName = "192.168.1.101";
     public static RecyclerView productView;
     public static List<Product> allProducts = new ArrayList<>();
     public static String clickedItem;
+    public static Set<String> hashIDList = new HashSet<String>();
+    public static Set<String> productNameList = new HashSet<String>();
+    public static SharedPreferences spref_list;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +43,54 @@ public class RegistrationActivity extends AppCompatActivity {
         productView.setLayoutManager(linearLayoutManager);
         productView.setHasFixedSize(true);
         System.out.println("........Reg activity started........");
+
+        //TODO: reproduce the stored allProducts
+
+        spref_list = getSharedPreferences("Lists", MODE_PRIVATE);
+        productNameList = spref_list.getStringSet("productNameList",new HashSet<String>());
+        hashIDList = spref_list.getStringSet("hashIDList",new HashSet<String>());
+
+        System.out.println("hashIDList = "+hashIDList);
+
+        //REFRESH HashIDList and ProductNameList !!!!!!!!!!!!
+        /*hashIDList = new HashSet<>();
+        productNameList = new HashSet<>();
+
+        SharedPreferences.Editor edit = spref_list.edit();
+        edit.putStringSet("hashIDList",hashIDList);
+        edit.putStringSet("productNameList",productNameList);
+        edit.apply();*/
+
+        allProducts = new ArrayList<>();
+        for(String s:hashIDList){
+            System.out.println("hash id = " + s);
+            SharedPreferences preferences = getSharedPreferences(s,MODE_APPEND);
+            String n = preferences.getString("name",null);
+            String h = preferences.getString("hashID",null);
+            String u = preferences.getString("username",null);
+            String pa = preferences.getString("password",null);
+            Boolean li = preferences.getBoolean("loggedIn",false);
+            System.out.println("name = "+n+" hashID = "+h+" username = "+u+" password = "+pa+" logged in = "+li);
+            Product p = new Product(n,h);
+            p.setName(n);
+            p.setHashID(h);
+            p.setUsername(u);
+            p.setPassword(pa);
+            p.setIfLoggedIn(li);
+            allProducts.add(p);
+        }
+
+        System.out.println("allProducts = "+allProducts);
+
+        /*Product product = new Product("home","aa");
+        product.setUsername("qwer");
+        product.setPassword("qwer");
+        product.setIfLoggedIn(true);
+        allProducts.add(product);*/
+
         for (Product fileEntry : allProducts) {
             System.out.println(fileEntry.getName() +"........" + fileEntry.getHashID());
         }
-
-        //TODO: reproduce the stored allProducts
 
         if(allProducts.size() > 0){
             System.out.println(".......Products are there.........");
@@ -87,17 +137,36 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String name = nameField.getText().toString();
-                final String quantity = quantityField.getText().toString();
+                final String hashID = quantityField.getText().toString();
 
-                if(TextUtils.isEmpty(name) || quantity.length() <= 0){
+                if(TextUtils.isEmpty(name) || hashID.length() <= 0){
                     Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
-                }
-                else{
-                    Product newProduct = new Product(name, quantity);
-                    allProducts.add(newProduct);
+                } else if(hashIDList.contains(hashID)){
+                    Toast.makeText(RegistrationActivity.this, "hashID already exists. Check again !", Toast.LENGTH_LONG).show();
+                } else if(productNameList.contains(name)){
+                    Toast.makeText(RegistrationActivity.this, "Name already exists. Please choose another name !", Toast.LENGTH_LONG).show();
+                } else{
+                    /*Product newProduct = new Product(name, hashID);
                     newProduct.setIfLoggedIn(false);
+                    allProducts.add(newProduct);*/
+                    productNameList.add(name);
+                    hashIDList.add(hashID);
 
                     //TODO: store allProducts
+                    SharedPreferences.Editor editor = getSharedPreferences(hashID,MODE_PRIVATE).edit();
+                    editor.clear();
+                    editor.putString("name", name);
+                    editor.putString("hashID",hashID);
+                    editor.apply();
+
+
+                    SharedPreferences.Editor editor2 = spref_list.edit();
+                    editor2.clear();
+                    editor2.putStringSet("hashIDList",hashIDList);
+                    editor2.putStringSet("productNameList",productNameList);
+                    editor2.apply();
+
+                    System.out.println("hashIDList = "+hashIDList);
 
                     Intent t= new Intent(RegistrationActivity.this,RegistrationActivity.class);
                     startActivity(t);

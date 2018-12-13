@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -30,21 +31,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         //mDatabase = new SqliteDatabase(context);
     }
 
-    /*public ProductAdapter(){
-
-    }*/
-
-
-
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.product_list_layout, parent, false);
 
         textView = (TextView) view.findViewById(R.id.product_name);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RegistrationActivity.clickedItem = textView.getText().toString();
+                TextView t = ((TextView)view);
+                String str = t.getText().toString();
+                System.out.println("item clicked = "+str);
+                RegistrationActivity.clickedItem = str;
                 System.out.println("........clicked product = "+RegistrationActivity.clickedItem);
                 proceed();
             }
@@ -68,14 +66,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.deleteProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                deleteTaskDialogBox(position,singleProduct);
                 //delete row from database
-
-                listProducts.remove(position);
-
-                //TODO: store listProducts i.e. allProducts
-                //refresh the activity page.
-                ((Activity)context).finish();
-                context.startActivity(((Activity) context).getIntent());
             }
         });
     }
@@ -98,7 +91,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public int getItemCount() {
         return listProducts.size();
     }
-
 
     private void editTaskDialog(final Product product){
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -131,9 +123,44 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                     //refresh the activity
                     ((Activity)context).finish();
                     context.startActivity(((Activity)context).getIntent());
-                    product.setName(name);
 
                     //TODO: store allProducts
+                    System.out.println("name b4 change = "+product.getName());
+                    RegistrationActivity.productNameList.remove(product.getName());
+                    String corresHashId = product.getHashID();
+
+                    product.setName(name);
+                    System.out.println("name after change = "+product.getName());
+                    for(Product p : listProducts){
+                        if(p.getHashID() == corresHashId)
+                            p.setName(name);
+                    }
+
+                    RegistrationActivity.productNameList.add(product.getName());
+                    SharedPreferences.Editor editor2 = RegistrationActivity.spref_list.edit();
+                    editor2.clear();
+                    editor2.putStringSet("hashIDList",RegistrationActivity.hashIDList);
+                    editor2.putStringSet("productNameList",RegistrationActivity.productNameList);
+                    editor2.apply();
+
+                    //TODO - store the new name in shared pref!!
+                    SharedPreferences spref = context.getSharedPreferences(corresHashId,Context.MODE_PRIVATE);
+                    String usr = spref.getString("username",null);
+                    String pas = spref.getString("password",null);
+                    Boolean logdIn = spref.getBoolean("loggedIn",false);
+                    Boolean fcmTokenSent = spref.getBoolean("fcmTokenSent",true);
+                    System.out.println("to store: name = "+name+" hashID = "+corresHashId+" username = "+usr+" password = "+pas+" logged In state = "+logdIn);
+
+                    SharedPreferences.Editor editor = spref.edit();
+                    editor.clear();
+                    editor.putString("name",name);
+                    editor.putString("hashID",corresHashId);
+                    editor.putString("username",usr);
+                    editor.putString("password",pas);
+                    editor.putBoolean("loggedIn",logdIn);
+                    editor.putBoolean("fcmTokenSent",fcmTokenSent);
+                    editor.apply();
+
                 }
             }
         });
@@ -142,6 +169,57 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(context, "Task cancelled", Toast.LENGTH_LONG).show();
+            }
+        });
+        builder.show();
+    }
+
+    private void deleteTaskDialogBox(final int position, final Product singleProduct){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Delete product");
+        builder.setMessage("Are you sure you want to delete product "+singleProduct.getName()+" ?");
+        builder.create();
+
+        builder.setPositiveButton("DELETE PRODUCT", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                listProducts.remove(position);
+                System.out.println(" deleted name = "+singleProduct.getName());
+                System.out.println(" deleted hash id = "+singleProduct.getHashID());
+                RegistrationActivity.hashIDList.remove(singleProduct.getHashID());
+                RegistrationActivity.productNameList.remove(singleProduct.getName());
+
+                SharedPreferences.Editor editor2 = RegistrationActivity.spref_list.edit();
+                editor2.clear();
+                editor2.putStringSet("hashIDList",RegistrationActivity.hashIDList);
+                editor2.putStringSet("productNameList",RegistrationActivity.productNameList);
+                editor2.apply();
+
+                SharedPreferences.Editor editor = context.getSharedPreferences(singleProduct.getHashID(),Context.MODE_PRIVATE).edit();
+                editor.remove("hashID");
+                editor.remove("name");
+                editor.remove("username");
+                editor.remove("password");
+                editor.remove("fcmTokenSent");
+                editor.remove("loggedIn");
+                editor.apply();
+
+                Toast.makeText(context, "Product deleted successfully !", Toast.LENGTH_SHORT).show();
+
+                //TODO: store listProducts i.e. allProducts
+                //refresh the activity page.
+                ((Activity)context).finish();
+                context.startActivity(((Activity) context).getIntent());
+
+            }
+        });
+
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(context, "Task cancelled", Toast.LENGTH_SHORT).show();
             }
         });
         builder.show();

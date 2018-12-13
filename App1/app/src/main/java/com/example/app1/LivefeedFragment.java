@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,8 +75,10 @@ public class LivefeedFragment extends Fragment {
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
 
-        spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
-        servername = spref_ip.getString("ip_address","");
+        /*spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
+        servername = spref_ip.getString("ip_address","");*/
+
+        servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
         //servername =  MainActivity.jIP.getText().toString();
 
@@ -138,7 +139,7 @@ public class LivefeedFragment extends Fragment {
                         @Override
                         public void run() {
                             try{
-                                System.out.println(".............voice button cliked...!!!");
+                                System.out.println(".............voice button clicked...!!!");
                                 while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
                                 handshake_socket = new Socket(servername, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
@@ -311,14 +312,14 @@ public class LivefeedFragment extends Fragment {
         try {
             //spref_ip = PreferenceManager.getDefaultSharedPreferences(this);
             //servername = spref_ip.getString("ip_address","");
-            System.out.println(".........into send msg................. with servername = "+ MainActivity.serverName);
-            msgSocket = new Socket(MainActivity.serverName, msgPort);
+            System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
+            msgSocket = new Socket(RegistrationActivity.serverName, msgPort);
             OutputStream out =  msgSocket.getOutputStream();
             InputStream in = msgSocket.getInputStream();
             out.write(p);
             out.flush();
             in.read();
-            System.out.println(".............byte sent...........");
+            System.out.println(".............byte sent : " + p);
             try{
                 msgSocket.close();
             }catch (IOException e){

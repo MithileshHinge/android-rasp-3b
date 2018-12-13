@@ -72,4 +72,5 @@ public class ActivityLogFragment extends Fragment {
 
         return v;
     }
+
 }

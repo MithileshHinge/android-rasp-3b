@@ -35,6 +35,11 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
         // sending reg id to your server
         System.out.println(".......FCM TOKEN... = " + refreshedToken);
+        LoginActivity.fcmToken = refreshedToken;
+        SharedPreferences.Editor editor = getSharedPreferences("fcmToken",MODE_PRIVATE).edit();
+        editor.putString("fcmToken",refreshedToken);
+        editor.apply();
+
         //sendRegistrationToServer(refreshedToken);
 
         // Notify UI that registration has completed, so the progress indicator can be hidden.

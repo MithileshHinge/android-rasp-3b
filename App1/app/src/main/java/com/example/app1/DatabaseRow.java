@@ -1,10 +1,6 @@
 package com.example.app1;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 /**
  * Created by Sibhali on 7/30/2017.
  */
@@ -15,29 +11,29 @@ public class DatabaseRow {
     String _date;
     int _isBookmarked;
     String _thumbpath;
-
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
+    String _hashID;
 
     // Empty constructor
     public DatabaseRow(){
 
     }
     // constructor
-    public DatabaseRow(int id, String name, String date, int isBookmarked, String thumbpath ){
+    public DatabaseRow(int id, String name, String date, int isBookmarked, String thumbpath, String hashID ){
         this._id = id;
         this._name = name;
         this._date = date;
         this._isBookmarked = isBookmarked;
         this._thumbpath = thumbpath;
+        this._hashID = hashID;
     }
 
     // constructor
-    public DatabaseRow(String name, String date, int isBookmarked, String thumbpath){
+    public DatabaseRow(String name, String date, int isBookmarked, String thumbpath, String hashID){
         this._name = name;
         this._date= date;
         this._isBookmarked = isBookmarked;
         this._thumbpath = thumbpath;
+        this._hashID = hashID;
     }
     // getting ID
     public int getID(){
@@ -86,4 +82,13 @@ public class DatabaseRow {
     public void setThumbpath(String thumbpath){
         _thumbpath = thumbpath;
     }
+
+    public String getHashID(){
+        return _hashID;
+    }
+
+    public void setHashID(String hashID){
+        _hashID = hashID;
+    }
+
 }

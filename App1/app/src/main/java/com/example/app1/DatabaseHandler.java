@@ -1,14 +1,14 @@
 package com.example.app1;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -28,7 +28,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             KEY_NAME = "name",
             KEY_DATE = "date",
             KEY_BKMRK = "bkmrk",
-            KEY_THUMBPATH = "thumbpath";
+            KEY_THUMBPATH = "thumbpath",
+            KEY_HASHID = "hashid";
 
 
     public DatabaseHandler(Context context) {
@@ -44,7 +45,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_NAME + " TEXT ,"
                 + KEY_DATE + " TEXT ,"
                 + KEY_BKMRK + " INTEGER ,"
-                + KEY_THUMBPATH + " TEXT "
+                + KEY_THUMBPATH + " TEXT ,"
+                + KEY_HASHID + " TEXT "
                 + ")";
         db.execSQL(CREATE_ACTIVITY_LOG_TABLE);
     }
@@ -72,6 +74,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_DATE, rowEntry.getDateTime());
         values.put(KEY_BKMRK, rowEntry.isBookmarked());
         values.put(KEY_THUMBPATH, rowEntry.getThumbpath());
+        values.put(KEY_HASHID, rowEntry.getHashID());
 
         // Inserting Row
         db.insert(TABLE_ACTIVITY_LOG, null, values);
@@ -82,11 +85,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     DatabaseRow getRow(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_ACTIVITY_LOG, new String[]{KEY_ID, KEY_NAME, KEY_DATE, KEY_BKMRK, KEY_THUMBPATH}, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        Cursor cursor = db.query(TABLE_ACTIVITY_LOG, new String[]{KEY_ID, KEY_NAME, KEY_DATE, KEY_BKMRK, KEY_THUMBPATH, KEY_HASHID}, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
-        DatabaseRow rowEntry = new DatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getString(4));
+        DatabaseRow rowEntry = new DatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getString(4), cursor.getString(5));
         // return contact
         return rowEntry;
     }
@@ -109,6 +112,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 rowEntry.setDateTime(cursor.getString(2));
                 rowEntry.setBookmarked(cursor.getInt(3));
                 rowEntry.setThumbpath(cursor.getString(4));
+                rowEntry.setHashID(cursor.getString(5));
 
 
                 // Adding contact to list
@@ -129,6 +133,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_DATE, rowEntry.getDateTime());
         values.put(KEY_BKMRK, rowEntry.isBookmarked());
         values.put(KEY_THUMBPATH, rowEntry.getThumbpath());
+        values.put(KEY_HASHID,rowEntry.getHashID());
 
         // updating row
         return db.update(TABLE_ACTIVITY_LOG, values, KEY_ID + " = ?", new String[]{String.valueOf(rowEntry.getID())});

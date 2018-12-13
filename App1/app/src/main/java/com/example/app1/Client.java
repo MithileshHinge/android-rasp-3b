@@ -5,7 +5,6 @@ package com.example.app1;
  */
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
-import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -33,9 +32,10 @@ public class Client extends Thread {
         try {
             //serverName = MainActivity.jIP.getText().toString();
             //serverName="192.168.7.2";
-            spref_ip = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
+            /*spref_ip = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
             serverName = spref_ip.getString("ip_address","");
-
+*/
+            serverName = RegistrationActivity.serverName;
             while(!LivefeedFragment.sendMsg(LivefeedFragment.BYTE_START_LIVEFEED)){}
 
             socket = new Socket(serverName, port);

@@ -52,6 +52,7 @@ public class NotifyService extends FirebaseMessagingService {
 
     public JSONObject json;
     public RemoteMessage remoteMessage;
+    public static String recvdHashID, corresProduct;
 
     //public NotifyService(){    }
 
@@ -72,12 +73,12 @@ public class NotifyService extends FirebaseMessagingService {
             e.printStackTrace();
         }
         final Context context = getApplicationContext();
-        String notifTitle = "Something's happening at your door!";
+        String notifTitle = "Something's happening at your door! : "+ corresProduct ;
         String notifText = "Generating video...";
 
-        String notifVdoTitle = "Something's happening at your door! Video generated.";
+        String notifVdoTitle = "Something's happening at your door! Video generated. : "+corresProduct;
         String notifVdoText = "Tap to watch video.";
-        final String lightTitle = "Lights have changed";
+        final String lightTitle = "Lights have changed : "+ corresProduct;
 
         final NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notif).setContentTitle(notifTitle).setContentText(notifText).setAutoCancel(true);
         final NotificationCompat.Builder notifVdoBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_video).setContentTitle(notifVdoTitle).setContentText(notifVdoText).setAutoCancel(true);
@@ -112,6 +113,14 @@ public class NotifyService extends FirebaseMessagingService {
                     int p = in.read();*/
                     //JSONObject json = new JSONObject(remoteMessage.getData());
                     int p = json.getInt("NotifByte");
+                    recvdHashID = json.getString("HashId");
+                    System.out.println("HashID" + recvdHashID);
+
+                    for (Product product : RegistrationActivity.allProducts) {
+                        if((product.getHashID()).equals(recvdHashID)) {
+                            corresProduct = product.getName();
+                        }
+                    }
                     /*out.write(1);
                     out.flush();*/
                     System.out.println("NOTIF  RECIEVED: "+ String.valueOf(p));
@@ -123,11 +132,11 @@ public class NotifyService extends FirebaseMessagingService {
 
                     if(p==BYTE_ALERT1)
                     {
-                        notifBuilder.setContentTitle("Alert level1.");
+                        notifBuilder.setContentTitle("Alert level1 : "+corresProduct);
                     }
                     if(p == BYTE_FACEFOUND_VDOGENERATED)
                     {
-                        notifVdoBuilder.setContentTitle("Face Found.Video generated");
+                        notifVdoBuilder.setContentTitle("Face Found.Video generated : "+corresProduct);
                         _name = "Face Found.Video generated";
                         //String datenow = DatabaseRow.dateFormat.format(DatabaseRow.date);
                         //String datenow = getCurrentTimeStamp();
@@ -136,7 +145,7 @@ public class NotifyService extends FirebaseMessagingService {
                     if(p == BYTE_ALERT2)
                     {
                         _name = "Suspicious activity. Alert level 2";
-                        notifVdoBuilder.setContentTitle("Suspicious activity.Video generated");
+                        notifVdoBuilder.setContentTitle("Suspicious activity.Video generated : "+corresProduct);
                     }
                     if( p == BYTE_ABRUPT_END){
                         _name = "Abrupt end of activity.";
@@ -177,15 +186,16 @@ public class NotifyService extends FirebaseMessagingService {
                         String _date = json.getString("date");
                         if(p == BYTE_LIGHT){
                             _name = lightTitle;
-                            db.addRow(new DatabaseRow(_name,_date, 0 , null));
+                            db.addRow(new DatabaseRow(_name,_date, 0 , null, recvdHashID));
                         }else {
-                            db.addRow(new DatabaseRow(_name, _date, 0, imageName));
+                            db.addRow(new DatabaseRow(_name, _date, 0, imageName, recvdHashID));
                         }
                     }
                     /*DataInputStream din = new DataInputStream(in);
                     MY_NOTIFICATION_ID = din.readInt();*/
                     MY_NOTIFICATION_ID = json.getInt("NotifId");
                     System.out.println("NOTIFICATION ID :" + MY_NOTIFICATION_ID);
+
                     /*out.write(9);
                     out.flush();
                     client.close();*/
@@ -198,6 +208,7 @@ public class NotifyService extends FirebaseMessagingService {
                     if (p == BYTE_FACEFOUND_VDOGENERATED || p == BYTE_ALERT2 || p == BYTE_ABRUPT_END) {
 
                         secondNotifIntent.putExtra("video_notif_id", MY_NOTIFICATION_ID);
+                        secondNotifIntent.putExtra("HashID",recvdHashID);
 
                         int requestID = (int) System.currentTimeMillis();
                         PendingIntent secondPendingIntent = PendingIntent.getActivity(context, requestID, secondNotifIntent, 0);

@@ -5,6 +5,7 @@ package com.example.app1;
  */
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -31,17 +32,15 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
 
-    public static String username;
-    public static String password;
     public static SharedPreferences spref_user,spref_email;
     private static SharedPreferences loggedIn;
-    boolean check2 = false;
     //public static boolean toBeVerified = false , createFile;    //toBeVerified is set true when user logs out from app
     public static boolean createFile;
     public static int i;
     public static Socket connServerSocket;
     public static InputStream in;
     public static OutputStream out;
+    private static Boolean fcmTokenSent = false;
 
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_login) Button _loginButton;
@@ -53,10 +52,13 @@ public class LoginActivity extends AppCompatActivity {
     //public static boolean validate1Done = false,validate2Done = false;
     public static int validate1Done = 3;    //if registered properly = 1; if wrong registration = 2; else default 3
     public static int connServerPort = 7660;
-    String hashID;
+    private static String hashID,name,username,password;
     public static String serverName;
     public static long timeDisableLoginStart, timeDisableLoginEnd;
     private Product product;
+    public static String fcmToken;
+
+    private static Context context;
 
     //TODO : Remove this portion ; just for testing
 
@@ -65,6 +67,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_screen);
         ButterKnife.inject(this);
+
+        context = this;
 
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
         for (Product product : RegistrationActivity.allProducts) {
@@ -80,43 +84,51 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    System.out.println("...connecting server socket...");
                     connServerSocket = new Socket(serverName,connServerPort);
                     // Sending Reg ID
                     DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
                     dOut.writeUTF(hashID);
-                    int i = connServerSocket.getInputStream().read();
+                    final int i = connServerSocket.getInputStream().read();
                     System.out.println("....registration variable = "+i);
-                    if(i==5) {
-                        System.out.println(".......1........");
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getBaseContext(), "System not registered.", Toast.LENGTH_LONG).show();
-                                System.out.println(".......2........");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(i==5) {
+                                Toast.makeText(context, "System not registered", Toast.LENGTH_LONG).show();
+                                System.out.println("............System not registered.............");
+                            } else if(i == 1) {
+                                Toast.makeText(context, "System already registered", Toast.LENGTH_LONG).show();
+                                System.out.println("............System already registered.............");
                             }
-                        });
-                    } else if(i == 1) {
-                        System.out.println(".......3........");
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getBaseContext(), "System already registered.", Toast.LENGTH_LONG).show();
-                                System.out.println("............4............");
-                            }
-                        });
+                        }
+                    });
 
-                    }
-                    System.out.println("...thread sending reg id ends...");
                 } catch (IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getBaseContext(), "Please check your internet connection !", Toast.LENGTH_LONG).show();
+                            System.out.println("socket connection problem. Could not flush hash ID");
+                            finish();
+                        }
+                    });
                     e.printStackTrace();
                 }
             }
         }).start();
 
-        if(product.getIfLoggedIn()){
-            _usernameText.setText(product.getUsername());
-            _passwordText.setText(product.getPassword());
+        SharedPreferences spref = getSharedPreferences(hashID,MODE_APPEND);
+        Boolean loggedInState = spref.getBoolean("loggedIn",false);
+        name = spref.getString("name",null);
+        hashID = spref.getString("hashID",null);
+        username = spref.getString("username",null);
+        password = spref.getString("password",null);
+        System.out.println("...present hash ID logged in state = "+loggedInState);
+        System.out.println("Displaying : name = "+name+" hashID = "+hashID+" username = "+username+" password = "+password+" logged In state = "+loggedInState);
+
+        if(loggedInState){
+            _usernameText.setText(username);
+            _passwordText.setText(password);
             _loggedIn.setChecked(true);
         }
 
@@ -139,6 +151,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    public static void setAuth(String s, Context c){
+
+    }
+
     public void login() {
         Log.d(TAG, "Login");
 
@@ -147,27 +163,43 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        product.setUsername(username);
-        product.setPassword(password);
+        System.out.println(".....credentials done");
+        validate();
+        System.out.println(".....validation done");
+
+        while (validate1Done == 3) {
+        }
+        if (validate1Done == 2) {
+            System.out.println("...validate1Done value = 2");
+            return;
+        }
+        validate1Done = 3;
 
         if(_loggedIn.isChecked())
             product.setIfLoggedIn(true);
         else
             product.setIfLoggedIn(false);
+        product.setUsername(username);
+        product.setPassword(password);
 
+        //TODO - store username, password and loggedIn state in shared preference
 
-        System.out.println(".....credentials done");
-        validate();
-        System.out.println(".....validation done");
-        while (validate1Done == 3) {
-        }
-        if (validate1Done == 2)
-            return;
-        validate1Done = 3;
+        System.out.println("to store: hashID = "+hashID+" username = "+username+" password = "+password+" logged In state = "+_loggedIn.isChecked());
+        SharedPreferences.Editor editor = getSharedPreferences(hashID, MODE_APPEND).edit();
+        editor.clear();
+        editor.putString("name",name);
+        editor.putString("hashID",hashID);
+        editor.putString("username",username);
+        editor.putString("password",password);
+        editor.putBoolean("fcmTokenSent",fcmTokenSent);
 
-        System.out.println("...value of validate1Done = "+validate1Done);
+        if(_loggedIn.isChecked())
+            editor.putBoolean("loggedIn",true);
+        else
+            editor.putBoolean("loggedIn",false);
+        editor.apply();
 
-        new Thread(new Runnable() { 
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -290,10 +322,17 @@ public class LoginActivity extends AppCompatActivity {
                     dOut.writeUTF(password);
                     dOut.flush();
                     System.out.println("username and password flushed   "+username+"   "+password);
-                    //To be removed!! hard coded fcm reg token!!
-                    /*MyFirebaseInstanceIDService.refreshedToken = "cOFUjRSeIyc:APA91bGa-bfU4c5B76Q-LgeZo1OLtYYmuLVVGw-eEBVqyP3-1vx_UYIQ3Nj54jPoxFjs95FGV04h-kMdEjdqW6fflU8UMwakKZ48SRqeo49WP8xJNq9RXmOo64QxNtEWU8tUiNqI_o5n";
-                    dOut.writeUTF(MyFirebaseInstanceIDService.refreshedToken);
-                    dOut.flush();*/
+
+                    SharedPreferences spref_fcm = getSharedPreferences(hashID,MODE_PRIVATE);
+                    fcmTokenSent = spref_fcm.getBoolean("fcmTokenSent",false);
+                    if(!fcmTokenSent) {
+                        SharedPreferences sharedPreferences = getSharedPreferences("fcmToken",MODE_PRIVATE);
+                        fcmToken = sharedPreferences.getString("fcmToken",new String());
+                        System.out.println("....sending fcm token = "+fcmToken);
+                        dOut.writeUTF(fcmToken);
+                        dOut.flush();
+                        fcmTokenSent = true;
+                    }
 
                     i = in.read();
                     System.out.println("................");

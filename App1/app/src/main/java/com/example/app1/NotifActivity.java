@@ -36,13 +36,17 @@ public class NotifActivity extends AppCompatActivity {
     public static ImageView jIV;
     public static VideoView jVV;
     private static int videoNotifID;
+    private static String hashID;
     public static Context context;
-    //public static String servername;
+    public static String servername = RegistrationActivity.serverName;
+    public static int connServerPort = 7660;
     private Toolbar toolbar;
     private static SharedPreferences spref_ip;
 
     public static String filename;
     public int PortVdo = 7668;
+
+    public static final byte BYTE_START_VIDEO_DOWNLOAD = 14;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -65,6 +69,7 @@ public class NotifActivity extends AppCompatActivity {
         jVV.setMediaController(new MediaController(this));
 
         videoNotifID = intent.getIntExtra("video_notif_id", -1);
+        hashID = intent.getStringExtra("HashID");
 
         if (videoNotifID != -1) {
             jIV.setImageResource(R.drawable.ic_file_download_24dp);
@@ -83,29 +88,68 @@ public class NotifActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
+                                // Start login process
+                                SharedPreferences spref = getSharedPreferences(hashID,MODE_PRIVATE);
+                                String user = spref.getString("username",new String());
+                                String pass = spref.getString("password",new String());
+
+                                Socket socket = new Socket(servername,connServerPort);
+                                InputStream in = socket.getInputStream();
+                                OutputStream out = socket.getOutputStream();
+                                DataInputStream dIn = new DataInputStream(in);
+                                DataOutputStream dOut = new DataOutputStream(out);
+                                dOut.writeUTF(hashID);
+                                dOut.flush();
+                                final int i = in.read();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(i==5) {
+                                            Toast.makeText(context, "System not Registered", Toast.LENGTH_LONG).show();
+                                            System.out.println("............System not registered.............");
+                                        } else if(i == 1) {
+                                            Toast.makeText(context, "System already Registered", Toast.LENGTH_SHORT).show();
+                                            System.out.println("............System already registered.............");
+                                        }
+                                    }
+                                });
+
+                                dOut.writeUTF(user);
+                                dOut.flush();
+                                dOut.writeUTF(pass);
+                                dOut.flush();
+                                in.read();
+
+                                // Start Video downloading process
+                                while(!LivefeedFragment.sendMsg(BYTE_START_VIDEO_DOWNLOAD)){}
                                 /*SocketAddress address = new InetSocketAddress(servername,PortVdo);
                                 SocketChannel clientChannel = SocketChannel.open(address);
                                 Socket socketVdo = clientChannel.socket();*/
-                                Socket socketVdo = new Socket(RegistrationActivity.serverName, PortVdo);
+                                System.out.println("Starting Video download");
+                                Socket socketVdo = new Socket(servername, PortVdo);
                                 System.out.println("...vdo socket connected...");
                                 OutputStream outVdo = socketVdo.getOutputStream();
                                 DataOutputStream doutVdo = new DataOutputStream(outVdo);
+                                doutVdo.writeUTF(hashID);
+                                doutVdo.flush();
                                 doutVdo.writeInt(videoNotifID);
                                 doutVdo.flush();
+                                System.out.println("Hash ID : " + hashID + " Video Notif ID : " + videoNotifID);
 
 
                                 InputStream inVdo = socketVdo.getInputStream();
                                 DataInputStream dInVdo = new DataInputStream(inVdo);
-
                                 int filenameSize = dInVdo.readInt();
-                                byte[] filenameInBytes = new byte[filenameSize];
                                 outVdo.write(1);
                                 outVdo.flush();
+                                System.out.println("File Size : " + filenameSize);
+                                byte[] filenameInBytes = new byte[filenameSize];
                                 inVdo.read(filenameInBytes);
                                 filename = new String(filenameInBytes);
-                                System.out.println("FILENAME RECIEVED :" + filename);
+                                System.out.println("FILENAME RECIEVED :"  + filename);
                                 outVdo.write(1);
                                 outVdo.flush();
+
                                 final File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
                                 final String filepath = vdoDirectory.getPath() + "/" + filename;
                                 FileOutputStream fileOut = new FileOutputStream(filepath);

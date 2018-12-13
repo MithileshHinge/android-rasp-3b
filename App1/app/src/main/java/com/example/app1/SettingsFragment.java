@@ -31,10 +31,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         // Load the Preferences from the XML file
         addPreferencesFromResource(R.xml.settings_preferences);
 
-        spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
-        servername = spref_ip.getString("ip_address","");
+        /*spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
+        servername = spref_ip.getString("ip_address","");*/
 
-        Preference p = getPreferenceScreen().findPreference("key2");
+        servername = RegistrationActivity.serverName;
+
+        /*Preference p = getPreferenceScreen().findPreference("key2");
         if (p instanceof EditTextPreference) {
             spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
             SharedPreferences.Editor edit1 = spref_ip.edit();
@@ -51,7 +53,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                     edit1.commit();
                 }
             }
-        }
+        }*/
         Preference p2 = getPreferenceScreen().findPreference("key4");
         SharedPreferences spref_mode = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor edit = spref_mode.edit();
@@ -104,10 +106,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 p5.setSummary(spref_email.getString("email_id",""));
             }
         }
-
-
-
-
     }
     @Override
     public void onResume() {
@@ -140,7 +138,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 public void run() {
                     try {
                         spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
-                        servername = spref_ip.getString("ip_address", "");
+                        //servername = spref_ip.getString("ip_address", "");
                         System.out.println("Servername received    "+ servername);
                         Socket socket = new Socket(servername, msgPort);
                         OutputStream out = socket.getOutputStream();

@@ -1,89 +1,27 @@
 {
   "project_info": {
-    "project_number": "803810434879",
-    "firebase_url": "https://magiceye-abfb5.firebaseio.com",
-    "project_id": "magiceye-abfb5",
-    "storage_bucket": "magiceye-abfb5.appspot.com"
+    "project_number": "776142717175",
+    "firebase_url": "https://arvis-aws-rasp-3b.firebaseio.com",
+    "project_id": "arvis-aws-rasp-3b",
+    "storage_bucket": "arvis-aws-rasp-3b.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:803810434879:android:5f5c3f384705a59f",
+        "mobilesdk_app_id": "1:776142717175:android:5f5c3f384705a59f",
         "android_client_info": {
           "package_name": "com.example.app1"
         }
       },
       "oauth_client": [
         {
-          "client_id": "803810434879-og6i7ghu10hltfsjrke23gnhtho6h4e9.apps.googleusercontent.com",
+          "client_id": "776142717175-80muvjr4ifk5b2f1h5mcg13j2fd509l8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCloXsf2fhO8gYg8TOZKvOReTlSbqdDl-w"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:803810434879:android:3bd3a3b067b26ae8",
-        "android_client_info": {
-          "package_name": "com.magiceye.oti"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "803810434879-og6i7ghu10hltfsjrke23gnhtho6h4e9.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCloXsf2fhO8gYg8TOZKvOReTlSbqdDl-w"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:803810434879:android:f72aad3412d784f6",
-        "android_client_info": {
-          "package_name": "info.androidhive.firebasenotifications"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "803810434879-og6i7ghu10hltfsjrke23gnhtho6h4e9.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCloXsf2fhO8gYg8TOZKvOReTlSbqdDl-w"
+          "current_key": "AIzaSyCInIVPrst-7PRaMkdSTJSLQgJK-2PxENY"
         }
       ],
       "services": {
