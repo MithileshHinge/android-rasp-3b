@@ -20,24 +20,21 @@ public class RecordingFragment extends Fragment {
     @Nullable
     private Context context;
     public static List<BookmarkedDatabaseRow> data= new ArrayList<>();
-    public static List<File> checkEntry = new ArrayList<>();
     public static File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
+    public static File specificVdoDir;
+    String hashID;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.image_fragment, container, false);
         getActivity().setTitle("Videos");
         context = getContext();
+        data=new ArrayList<>();
+        hashID = LoginActivity.clickedProductHashID;
+        specificVdoDir = new File(vdoDirectory.getPath(),RegistrationActivity.clickedItem);
 
         try {
-            for (File fileEntry : vdoDirectory.listFiles()) {
-                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-                if(checkEntry.contains(fileEntry)) {
-                    System.out.println("continued");
-                    continue;
-                }
-
+            for (File fileEntry : specificVdoDir.listFiles()) {
                 String extension = (fileEntry.getName()).split("\\.")[1];
-                checkEntry.add(fileEntry);
                 if(extension.equals("mp4")) {
                     BookmarkedDatabaseRow bookmarkedDatabaseRow = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(fileEntry.getPath());
 
@@ -46,14 +43,28 @@ public class RecordingFragment extends Fragment {
                         bookmarkedDatabaseRow.setUrl(fileEntry.getPath());
                         bookmarkedDatabaseRow.setBkmrk(false);
                         bookmarkedDatabaseRow.setStatus(false);
+                        bookmarkedDatabaseRow.setHashID(hashID);
                         MainActivity.bookmarkedDatabaseHandler.addRow(bookmarkedDatabaseRow);
                         bookmarkedDatabaseRow = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(fileEntry.getPath());
                     }
 
                     data.add(bookmarkedDatabaseRow);
 
-                    if (bookmarkedDatabaseRow.getBkmrk())
-                        ImageGalleryAdapter.bkmrkVideos.add(bookmarkedDatabaseRow);
+                    if (bookmarkedDatabaseRow.getBkmrk()) {
+                        Boolean present = false;
+                        String url2 = bookmarkedDatabaseRow.getUrl();
+                        for(BookmarkedDatabaseRow row : ImageGalleryAdapter.bkmrkVideos){
+                            String url1 = row.getUrl();
+                            if(url1.equals(url2)){
+                                present = true;
+                                continue;
+                            }
+
+                        }
+                        if(!present){
+                            ImageGalleryAdapter.bkmrkVideos.add(bookmarkedDatabaseRow);
+                        }
+                    }
                 }
             }
         }catch (NullPointerException e){
@@ -69,6 +80,8 @@ public class RecordingFragment extends Fragment {
         adapter.classSelector = 2;
         adapter.imageRecyclerView = recyclerView;
         recyclerView.setAdapter(adapter);
+        System.out.println("..................items in data...................." + data.size());
+        System.out.println("..................items in bkmrkVideos...................." + ImageGalleryAdapter.bkmrkVideos.size());
 
         return v;
 

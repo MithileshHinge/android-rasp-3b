@@ -25,14 +25,18 @@ public class ImageFragment extends Fragment {
     public static List<BookmarkedDatabaseRow> data = new ArrayList<>();
     public static List<File> checkEntry = new ArrayList<>();
     public static File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+    String hashID;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.image_fragment,container,false);
+        data = new ArrayList<>();
+        File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+        hashID = LoginActivity.clickedProductHashID;
 
         getActivity().setTitle("Pictures");
         context = getContext();
         try {
-            for (File fileEntry : imageStorageDir.listFiles()) {
+            for (File fileEntry : specificImgStorageDir.listFiles()) {
                 System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                 System.out.println(fileEntry);
                 System.out.println(fileEntry.getPath());
@@ -51,6 +55,7 @@ public class ImageFragment extends Fragment {
                         bookmarkedDatabaseRow.setUrl(fileEntry.getPath());
                         bookmarkedDatabaseRow.setBkmrk(false);
                         bookmarkedDatabaseRow.setStatus(false);
+                        bookmarkedDatabaseRow.setHashID(hashID);
                         MainActivity.bookmarkedDatabaseHandler.addRow(bookmarkedDatabaseRow);
                         bookmarkedDatabaseRow = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(fileEntry.getPath());
                     }

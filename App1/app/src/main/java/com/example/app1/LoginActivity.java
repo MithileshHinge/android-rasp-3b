@@ -52,11 +52,12 @@ public class LoginActivity extends AppCompatActivity {
     //public static boolean validate1Done = false,validate2Done = false;
     public static int validate1Done = 3;    //if registered properly = 1; if wrong registration = 2; else default 3
     public static int connServerPort = 7660;
-    private static String hashID,name,username,password;
+    public static String clickedProductHashID;
+    private static String name,username,password, email;
     public static String serverName;
     public static long timeDisableLoginStart, timeDisableLoginEnd;
     private Product product;
-    public static String fcmToken;
+    public static String fcmToken, emailID;
 
     private static Context context;
 
@@ -73,12 +74,14 @@ public class LoginActivity extends AppCompatActivity {
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
         for (Product product : RegistrationActivity.allProducts) {
             if(product.getName() == RegistrationActivity.clickedItem) {
-                hashID = product.getHashID();
+                clickedProductHashID = product.getHashID();
                 this.product = product;
             }
         }
-        System.out.println("reg id = "+ hashID);
+        System.out.println("reg id = "+ clickedProductHashID);
         serverName = RegistrationActivity.serverName;
+
+        //proceed();
 
         new Thread(new Runnable() {
             @Override
@@ -87,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                     connServerSocket = new Socket(serverName,connServerPort);
                     // Sending Reg ID
                     DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
-                    dOut.writeUTF(hashID);
+                    dOut.writeUTF(clickedProductHashID);
                     final int i = connServerSocket.getInputStream().read();
                     System.out.println("....registration variable = "+i);
                     runOnUiThread(new Runnable() {
@@ -117,16 +120,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         }).start();
 
-        SharedPreferences spref = getSharedPreferences(hashID,MODE_APPEND);
+        SharedPreferences spref = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
         Boolean loggedInState = spref.getBoolean("loggedIn",false);
-        name = spref.getString("name",null);
-        hashID = spref.getString("hashID",null);
-        username = spref.getString("username",null);
-        password = spref.getString("password",null);
-        System.out.println("...present hash ID logged in state = "+loggedInState);
-        System.out.println("Displaying : name = "+name+" hashID = "+hashID+" username = "+username+" password = "+password+" logged In state = "+loggedInState);
-
+        System.out.println("logged In state = "+loggedInState);
         if(loggedInState){
+            username = spref.getString("username",new String());
+            password = spref.getString("password",new String());
             _usernameText.setText(username);
             _passwordText.setText(password);
             _loggedIn.setChecked(true);
@@ -148,10 +147,6 @@ public class LoginActivity extends AppCompatActivity {
                 login();
             }
         });
-
-    }
-
-    public static void setAuth(String s, Context c){
 
     }
 
@@ -184,11 +179,9 @@ public class LoginActivity extends AppCompatActivity {
 
         //TODO - store username, password and loggedIn state in shared preference
 
-        System.out.println("to store: hashID = "+hashID+" username = "+username+" password = "+password+" logged In state = "+_loggedIn.isChecked());
-        SharedPreferences.Editor editor = getSharedPreferences(hashID, MODE_APPEND).edit();
-        editor.clear();
-        editor.putString("name",name);
-        editor.putString("hashID",hashID);
+        System.out.println("to store: hashID = "+clickedProductHashID+" username = "+username+" password = "+password+" logged In state = "+_loggedIn.isChecked());
+
+        SharedPreferences.Editor editor = getSharedPreferences(clickedProductHashID, MODE_PRIVATE).edit();
         editor.putString("username",username);
         editor.putString("password",password);
         editor.putBoolean("fcmTokenSent",fcmTokenSent);
@@ -311,7 +304,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void run() {
                 System.out.println("...starting thread to send username and password...");
-                //i = 0;
                 try {
                     // Sending Username and Password
                     in = connServerSocket.getInputStream();
@@ -323,15 +315,20 @@ public class LoginActivity extends AppCompatActivity {
                     dOut.flush();
                     System.out.println("username and password flushed   "+username+"   "+password);
 
-                    SharedPreferences spref_fcm = getSharedPreferences(hashID,MODE_PRIVATE);
+                    SharedPreferences spref_fcm = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
                     fcmTokenSent = spref_fcm.getBoolean("fcmTokenSent",false);
                     if(!fcmTokenSent) {
                         SharedPreferences sharedPreferences = getSharedPreferences("fcmToken",MODE_PRIVATE);
-                        fcmToken = sharedPreferences.getString("fcmToken",new String());
+                        fcmToken = sharedPreferences.getString("fcmToken","");
                         System.out.println("....sending fcm token = "+fcmToken);
+                        SharedPreferences spref = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
+                        emailID = spref.getString("email","");
+                        System.out.println("....sending email ID = "+emailID);
                         dOut.writeUTF(fcmToken);
                         dOut.flush();
                         fcmTokenSent = true;
+                        dOut.writeUTF(emailID);
+                        dOut.flush();
                     }
 
                     i = in.read();
@@ -424,6 +421,12 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 },30000);
 
+    }
+
+    public void proceed(){
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivityForResult(intent, 0);
+        finish();
     }
 
 }

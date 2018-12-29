@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -119,6 +120,7 @@ public class NotifActivity extends AppCompatActivity {
                                 dOut.writeUTF(pass);
                                 dOut.flush();
                                 in.read();
+                                in.read();
 
                                 // Start Video downloading process
                                 while(!LivefeedFragment.sendMsg(BYTE_START_VIDEO_DOWNLOAD)){}
@@ -151,7 +153,17 @@ public class NotifActivity extends AppCompatActivity {
                                 outVdo.flush();
 
                                 final File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
-                                final String filepath = vdoDirectory.getPath() + "/" + filename;
+                                SharedPreferences spref_folder = getSharedPreferences(hashID,MODE_PRIVATE);
+                                String folderName = spref_folder.getString("name","Default");
+                                System.out.println(".....product folder name = " + folderName);
+                                final File specificVdoDir = new File(vdoDirectory.getPath(),folderName);
+                                if (!specificVdoDir.exists()) {
+                                    if (!specificVdoDir.mkdirs()) {
+                                        Log.d("App", "failed to create video directory");
+                                    }
+                                }
+
+                                final String filepath = specificVdoDir.getPath() + "/" + filename;
                                 FileOutputStream fileOut = new FileOutputStream(filepath);
                                 //FileOutputStream fileOut = openFileOutput(filename, MODE_PRIVATE);
                                 byte[] buffer = new byte[16 * 1024];

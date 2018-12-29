@@ -80,15 +80,9 @@ public class BookmarkFragment extends Fragment {
 
         if (RecordingFragment.data.size() == 0){
             try {
-                for (File fileEntry : RecordingFragment.vdoDirectory.listFiles()) {
+                for (File fileEntry : RecordingFragment.specificVdoDir.listFiles()) {
                     System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-                    if(RecordingFragment.checkEntry.contains(fileEntry)) {
-                        System.out.println("continued");
-                        continue;
-                    }
-
                     String extension = (fileEntry.getName()).split("\\.")[1];
-                    RecordingFragment.checkEntry.add(fileEntry);
                     if(extension.equals("mp4")) {
                         BookmarkedDatabaseRow bookmarkedDatabaseRow = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(fileEntry.getPath());
 
@@ -102,7 +96,7 @@ public class BookmarkFragment extends Fragment {
 
                         RecordingFragment.data.add(bookmarkedDatabaseRow);
 
-                        if (bookmarkedDatabaseRow.getBkmrk())
+                        if (bookmarkedDatabaseRow.getBkmrk() && !ImageGalleryAdapter.bkmrkVideos.contains(bookmarkedDatabaseRow))
                             ImageGalleryAdapter.bkmrkVideos.add(bookmarkedDatabaseRow);
                     }
                 }

@@ -28,7 +28,8 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
     private static final String
             KEY_ID = "id",
             KEY_URL = "url",
-            KEY_BKMRK = "bkmrk";
+            KEY_BKMRK = "bkmrk",
+            KEY_HASHID = "hashID";
 
 
 
@@ -43,7 +44,8 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
                 + TABLE_BOOKMARKS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY ,"
                 + KEY_URL + " TEXT ,"
-                + KEY_BKMRK + " INTEGER "
+                + KEY_BKMRK + " INTEGER ,"
+                + KEY_HASHID + " TEXT "
                 + ")";
 
         db.execSQL(CREATE_ACTIVITY_LOG_TABLE);
@@ -70,7 +72,7 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_URL, rowEntry.getUrl());
         values.put(KEY_BKMRK, rowEntry.getBkmrk());
-
+        values.put(KEY_HASHID, rowEntry.getHashID());
         // Inserting Row
         db.insert(TABLE_BOOKMARKS, null, values);
         db.close(); // Closing database connection
@@ -84,7 +86,7 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
         if (cursor != null && cursor.getCount()!=0) {
             cursor.moveToFirst();
 
-            BookmarkedDatabaseRow rowEntry = new BookmarkedDatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getInt(2));
+            BookmarkedDatabaseRow rowEntry = new BookmarkedDatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getString(3));
             cursor.close();
 
             // return row
@@ -100,7 +102,7 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_BOOKMARKS + " WHERE " + KEY_URL + "='" + url + "'", null);
         if (cursor != null && cursor.getCount() != 0){
             cursor.moveToFirst();
-            BookmarkedDatabaseRow rowEntry = new BookmarkedDatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getInt(2));
+            BookmarkedDatabaseRow rowEntry = new BookmarkedDatabaseRow(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getString(3));
             cursor.close();
 
             return rowEntry;
@@ -125,6 +127,7 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
                 rowEntry.setID(Integer.parseInt(cursor.getString(0)));
                 rowEntry.setUrl(cursor.getString(1));
                 rowEntry.setBkmrk(cursor.getInt(2));
+                rowEntry.setHashID(cursor.getString(3));
 
                 // Adding rowEntry to list
                 rows.add(rowEntry);
@@ -142,6 +145,7 @@ public class BookmarkedDatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_URL, rowEntry.getUrl());
         values.put(KEY_BKMRK, rowEntry.getBkmrk());
+        values.put(KEY_HASHID, rowEntry.getHashID());
 
         // updating row
         return db.update(TABLE_BOOKMARKS, values, KEY_ID + " = ?", new String[]{String.valueOf(rowEntry.getID())});

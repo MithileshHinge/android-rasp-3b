@@ -165,9 +165,9 @@ public class MainActivity extends AppCompatActivity {
                         settingsFragmentTransaction.commit();
 
                         return true;
-                    case R.id.extras:
+                    /*case R.id.extras:
                         Toast.makeText(getApplicationContext(), "extras", Toast.LENGTH_SHORT).show();
-                        return true;
+                        return true;*/
                     default:
                         Toast.makeText(getApplicationContext(), "Somethings Wrong", Toast.LENGTH_SHORT).show();
                         return true;
@@ -191,10 +191,11 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerOpened(View drawerView) {
                 // Code here will be triggered once the drawer opens
                 mode = (TextView) findViewById(R.id.mode);
-                String s = spref_mode.getString("mode_type","");
+                SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.clickedProductHashID,MODE_PRIVATE);
+                String s = sharedPreferences.getString("modeType","");
                 mode.setText(s);
                 username = (TextView) findViewById(R.id.username);
-                String s1 = spref_user.getString("username","");
+                String s1 = sharedPreferences.getString("username","");
                 username.setText(s1);
 
                 super.onDrawerOpened(drawerView);

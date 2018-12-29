@@ -12,19 +12,22 @@ public class DatabaseRow {
     int _isBookmarked;
     String _thumbpath;
     String _hashID;
+    boolean _checkedStatus;
+
 
     // Empty constructor
     public DatabaseRow(){
 
     }
     // constructor
-    public DatabaseRow(int id, String name, String date, int isBookmarked, String thumbpath, String hashID ){
+    public DatabaseRow(int id, String name, String date, int isBookmarked, String thumbpath, String hashID){
         this._id = id;
         this._name = name;
         this._date = date;
         this._isBookmarked = isBookmarked;
         this._thumbpath = thumbpath;
         this._hashID = hashID;
+
     }
 
     // constructor
@@ -90,5 +93,10 @@ public class DatabaseRow {
     public void setHashID(String hashID){
         _hashID = hashID;
     }
+
+    public Boolean getStatus()  { return _checkedStatus; }
+
+    public void setStatus(Boolean checkedStatus) {this._checkedStatus = checkedStatus; }
+
 
 }

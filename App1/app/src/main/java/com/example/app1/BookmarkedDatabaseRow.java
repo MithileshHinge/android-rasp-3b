@@ -5,7 +5,7 @@ package com.example.app1;
  */
 public class BookmarkedDatabaseRow {
 
-    String _url;
+    String _url, _hashID;
     int _bkmrk;
     int _id;
     boolean _checkedStatus;
@@ -14,17 +14,19 @@ public class BookmarkedDatabaseRow {
 
     }
 
-    public BookmarkedDatabaseRow(int id, String url, int bkrmrk){
+    public BookmarkedDatabaseRow(int id, String url, int bkrmrk, String hashID){
         _id = id;
         _url = url;
         _bkmrk = bkrmrk;
+        _hashID = hashID;
 
     }
 
-    public BookmarkedDatabaseRow(String url, int bkmrk, boolean checkedStatus){
+    public BookmarkedDatabaseRow(String url, int bkmrk, boolean checkedStatus, String hashID){
         _url = url;
         _bkmrk = bkmrk;
         _checkedStatus = checkedStatus;
+        _hashID = hashID;
     }
 
     public int getID(){
@@ -58,6 +60,14 @@ public class BookmarkedDatabaseRow {
     public Boolean getStatus()  { return _checkedStatus; }
 
     public void setStatus(Boolean checkedStatus) {this._checkedStatus = checkedStatus; }
+
+    public String getHashID(){
+        return _hashID;
+    }
+
+    public void setHashID(String hashID){
+        _hashID = hashID;
+    }
 
 
 }

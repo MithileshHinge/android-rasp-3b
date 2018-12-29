@@ -44,6 +44,7 @@ public class LivefeedFragment extends Fragment {
     public static boolean frameChanged = false;
     public static Bitmap frame = null;
     private static Client t;
+    private static Listen listen;
 
     public byte[] buffer;
     public static int p;
@@ -59,6 +60,7 @@ public class LivefeedFragment extends Fragment {
     private static String servername;
     private Socket handshake_socket;
     private static SharedPreferences spref_ip;
+    public static int giveAlarm = 1;    // 1 = default, 2 = true, 3 = false
 
     private static int msgPort = 7676;
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13;
@@ -72,8 +74,12 @@ public class LivefeedFragment extends Fragment {
         Button photo_button = (Button)  v.findViewById(R.id.push_button);
         ToggleButton Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
         ToggleButton Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
+        ToggleButton Speaker_button = (ToggleButton) v.findViewById(R.id.Speaker_button);
+        ToggleButton Compound_button = (ToggleButton) v.findViewById(R.id.Compound_button);
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
+        Speaker_button.setChecked(false);
+        Compound_button.setChecked(false);
 
         /*spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
         servername = spref_ip.getString("ip_address","");*/
@@ -110,12 +116,19 @@ public class LivefeedFragment extends Fragment {
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "photo clicked", Toast.LENGTH_SHORT).show();
                 final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+
+                final File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+                if (!specificImgStorageDir.exists()) {
+                    if (!specificImgStorageDir.mkdirs()) {
+                        Log.d("App", "failed to create video directory");
+                    }
+                }
+
                 SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss");
                 Date date = new Date();
-                final String finalImageFileName = imageStorageDir.getPath() + "/" + date + ".jpg";
+                final String finalImageFileName = specificImgStorageDir.getPath() + "/" + date + ".jpg";
                 if(frame != null) {
                     try {
-
                         FileOutputStream fos = new FileOutputStream(finalImageFileName);
                         frame.compress(Bitmap.CompressFormat.PNG, 100, fos);
                         fos.close();
@@ -182,6 +195,22 @@ public class LivefeedFragment extends Fragment {
                 }
             }
         });
+
+        Speaker_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    System.out.println(".....SPEAKER BUTTON TURNED ON.....");
+                    listen = new Listen();
+                    listen.start();
+                }else{
+                    System.out.println(".....SPEAKER BUTTON TURNED OFF.....");
+                    listen.end();
+                }
+
+            }
+        });
+
 
         Alarm_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -292,6 +321,10 @@ public class LivefeedFragment extends Fragment {
     @Override
     public void onPause() {
         t.end();
+        if(listen.isAlive()){
+            System.out.println("........listen stopped !!!");
+            listen.end();
+        }
         if(status) {
             status = false;
             if (recorder != null) {
