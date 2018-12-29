@@ -33,6 +33,8 @@ public class Bookmarkedvideos extends Fragment {
         adapter.imageRecyclerView = recyclerView;
         recyclerView.setAdapter(adapter);
 
+        System.out.println("...................no of items in bkmrkVideos..................."+ImageGalleryAdapter.bkmrkVideos.size());
+
         return v;
 
     }

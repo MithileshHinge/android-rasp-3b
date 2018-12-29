@@ -145,20 +145,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
                     //TODO - store the new name in shared pref!!
                     SharedPreferences spref = context.getSharedPreferences(corresHashId,Context.MODE_PRIVATE);
-                    String usr = spref.getString("username",null);
+                    /*String usr = spref.getString("username",null);
                     String pas = spref.getString("password",null);
+                    String email = spref.getString("email",null);
                     Boolean logdIn = spref.getBoolean("loggedIn",false);
                     Boolean fcmTokenSent = spref.getBoolean("fcmTokenSent",true);
                     System.out.println("to store: name = "+name+" hashID = "+corresHashId+" username = "+usr+" password = "+pas+" logged In state = "+logdIn);
-
+                    */
                     SharedPreferences.Editor editor = spref.edit();
-                    editor.clear();
+                    //editor.clear();
                     editor.putString("name",name);
-                    editor.putString("hashID",corresHashId);
+                    /*editor.putString("hashID",corresHashId);
                     editor.putString("username",usr);
                     editor.putString("password",pas);
+                    editor.putString("email",email);
                     editor.putBoolean("loggedIn",logdIn);
-                    editor.putBoolean("fcmTokenSent",fcmTokenSent);
+                    editor.putBoolean("fcmTokenSent",fcmTokenSent);*/
                     editor.apply();
 
                 }
@@ -204,11 +206,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 editor.remove("password");
                 editor.remove("fcmTokenSent");
                 editor.remove("loggedIn");
+                editor.remove("email");
+                editor.clear();
                 editor.apply();
 
                 Toast.makeText(context, "Product deleted successfully !", Toast.LENGTH_SHORT).show();
 
-                //TODO: store listProducts i.e. allProducts
                 //refresh the activity page.
                 ((Activity)context).finish();
                 context.startActivity(((Activity) context).getIntent());

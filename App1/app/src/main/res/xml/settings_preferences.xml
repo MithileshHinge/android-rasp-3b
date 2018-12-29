@@ -7,13 +7,6 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="General Settings">
 
-        <!--android.support.v7.preference.EditTextPreference
-            android:key="key2"
-            android:title="Device IP Address"
-            android:summary="EditText Summary"
-            android:dialogMessage="Dialog Message"
-            android:defaultValue="192.168.1.105" /-->
-
         <android.support.v7.preference.ListPreference
             android:key="key4"
             android:title="Security MODE"
@@ -37,6 +30,15 @@
 
     <android.support.v7.preference.PreferenceCategory
         android:title="Account Settings">
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="keyy2"
+            android:title="Product"
+            android:summary="Set product name "
+            android:dialogMessage="Dialog Message"
+            android:defaultValue=""
+            android:enabled="false"/>
+
         <android.support.v7.preference.EditTextPreference
             android:key="keyy1"
             android:title="Username"
@@ -44,13 +46,6 @@
             android:dialogMessage="Dialog Message"
             android:defaultValue=""
             android:enabled="false"/>
-
-        <!--android.support.v7.preference.EditTextPreference
-            android:key="keyy2"
-            android:title="Password"
-            android:summary="Set password"
-            android:dialogMessage="Dialog Message"
-            android:defaultValue="Default value" /-->
 
         <android.support.v7.preference.EditTextPreference
             android:key="keyy3"

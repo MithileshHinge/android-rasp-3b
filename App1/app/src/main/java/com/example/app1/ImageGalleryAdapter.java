@@ -39,12 +39,10 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
     public static List<BookmarkedDatabaseRow> bkmrkVideos = new ArrayList<>();
     public static List<BookmarkedDatabaseRow> deleteItems = new ArrayList<>();
     private final View.OnClickListener onClickListener = new MyOnClickListener();
-    private final View.OnLongClickListener onLongClickListener = new MyOnLongClickListner();
+    private final View.OnLongClickListener onLongClickListener = new MyOnLongClickListener();
     private final ToggleButton.OnCheckedChangeListener onCheckedChangeListener = new MyOnCheckedListener();
     public int classSelector;        //1=image gallery, 2=video gallery, 3=bookmarked images, 4=bookmarked videos
     public RecyclerView imageRecyclerView;
-
-
 
 
     public ImageGalleryAdapter(Context context, List<BookmarkedDatabaseRow> data){
@@ -70,11 +68,9 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
             if(mActionMode == null) {
                 Bkmrk_btn.setOnCheckedChangeListener(onCheckedChangeListener);
                 Bkmrk_btn.setVisibility(View.VISIBLE);
-                System.out.println("..................view holder created @@@.................");
             }else{
                 Bkmrk_btn.setOnCheckedChangeListener(null);
                 Bkmrk_btn.setVisibility(View.GONE);
-                System.out.println("..................view holder created.................");
             }
 
         }
@@ -83,8 +79,6 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        System.out.println("************************** Case = " + classSelector);
-
         switch (classSelector){
 
             case 1 :
@@ -166,8 +160,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
         return (mActionMode == null ? 0 : 1);
     }
 
-
-    public class MyOnLongClickListner implements View.OnLongClickListener {
+    public class MyOnLongClickListener implements View.OnLongClickListener {
 
         @Override
         public boolean onLongClick(View view) {
@@ -325,32 +318,55 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         ImageFragment.data.get(itemPosition).setBkmrk(true);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(ImageFragment.data.get(itemPosition));
-                        bkmrkImages.add(ImageFragment.data.get(itemPosition));
+                        if(ImageFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkImages.add(ImageFragment.data.get(itemPosition));
                     } else if(classSelector == 2) {
                         //things for video gallery when bookmarked
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         RecordingFragment.data.get(itemPosition).setBkmrk(true);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(RecordingFragment.data.get(itemPosition));
-                        bkmrkVideos.add(RecordingFragment.data.get(itemPosition));
+                        System.out.println("...............RecordingFragment.data.get(itemPosition).getHashID().............."+RecordingFragment.data.get(itemPosition).getHashID());
+                        System.out.println("...............Login.hashID.................."+LoginActivity.clickedProductHashID);
+                        if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID)) {
+                            bkmrkVideos.add(RecordingFragment.data.get(itemPosition));
+                            System.out.println(".............vdo added into bkmrkVideos................");
+                        }
+                        System.out.println("...................no of bkmrkVideos after checked change..................." + bkmrkVideos.size());
                     }
                 } else {
-
                     if (classSelector == 1) {
                         //things for image gallery when not bookmarked
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         ImageFragment.data.get(itemPosition).setBkmrk(false);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(ImageFragment.data.get(itemPosition));
-                        bkmrkImages.remove(ImageFragment.data.get(itemPosition));
+                        if(ImageFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkImages.remove(ImageFragment.data.get(itemPosition));
                     } else if(classSelector == 2) {
-                        //things for video gallery when not bookmarked
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         RecordingFragment.data.get(itemPosition).setBkmrk(false);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(RecordingFragment.data.get(itemPosition));
-                        bkmrkVideos.remove(RecordingFragment.data.get(itemPosition));
+                        System.out.println("...............RecordingFragment.data.get(itemPosition).getHashID().............."+RecordingFragment.data.get(itemPosition).getHashID());
+                        System.out.println("...............Login.hashID.................."+LoginActivity.clickedProductHashID);
+                        if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID)) {
+                            bkmrkVideos.remove(RecordingFragment.data.get(itemPosition));
+                            System.out.println(".............vdo removed into bkmrkVideos................");
+                        }
+                        System.out.println("...................no of bkmrkVideos after removing checked change..................." + bkmrkVideos.size());
+
+                        /*int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
+                        BookmarkedDatabaseRow row = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(RecordingFragment.data.get(itemPosition).getUrl());
+                        if(row.getHashID().equals(LoginActivity.clickedProductHashID)){
+                            System.out.println(".............bkmrkVideos.size = "+bkmrkVideos.size());
+                            bkmrkVideos.remove(row);
+                            System.out.println(".............bkmrkVideos.size = "+bkmrkVideos.size());
+                        }
+                        row.setBkmrk(false);
+                        MainActivity.bookmarkedDatabaseHandler.updateRow(row);*/
                     } else if(classSelector == 3) {
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         BookmarkedDatabaseRow tempStore = bkmrkImages.get(itemPosition);
-                        bkmrkImages.remove(tempStore);
+                        if(bkmrkImages.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkImages.remove(tempStore);
                         tempStore.setBkmrk(false);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(tempStore);
                         ImageGalleryAdapter adapter = new ImageGalleryAdapter(context, ImageGalleryAdapter.bkmrkImages);
@@ -359,10 +375,11 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         imageRecyclerView.setAdapter(adapter);
                     } else if(classSelector == 4){
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
-                        BookmarkedDatabaseRow tempStore = bkmrkVideos.get(itemPosition);
-                        bkmrkVideos.remove(tempStore);
-                        tempStore.setBkmrk(false);
-                        MainActivity.bookmarkedDatabaseHandler.updateRow(tempStore);
+                        BookmarkedDatabaseRow row = bkmrkVideos.get(itemPosition);
+                        if(bkmrkVideos.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkVideos.remove(row);
+                        row.setBkmrk(false);
+                        MainActivity.bookmarkedDatabaseHandler.updateRow(row);
                         ImageGalleryAdapter adapter = new ImageGalleryAdapter(context, ImageGalleryAdapter.bkmrkVideos);
                         adapter.classSelector = 4;
                         adapter.imageRecyclerView = imageRecyclerView;

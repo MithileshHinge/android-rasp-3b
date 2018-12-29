@@ -18,12 +18,10 @@ import java.util.List;
  */
 public class ActivityLogFragment extends Fragment {
 
-    ActivityLogCustomAdapter logCustomAdapter;
-    ExpandableListView expandableListView;
-    //public static String datenow;
-
     List<String> listDataHeaders;
     HashMap<String, List<DatabaseRow>> listDataChild;
+
+
 
     @Nullable
     @Override
@@ -33,7 +31,7 @@ public class ActivityLogFragment extends Fragment {
 
         NotifyService.db = new DatabaseHandler(getActivity());
 
-        expandableListView= (ExpandableListView) v.findViewById(R.id.listView1);
+        ExpandableListView expandableListView= (ExpandableListView) v.findViewById(R.id.listView1);
 
 
         listDataHeaders = new ArrayList<>();
@@ -47,27 +45,31 @@ public class ActivityLogFragment extends Fragment {
         String[] months = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 
-        for (int i=databaseItems.size() - 1; i>=0; i--){
+        for (int i=databaseItems.size() - 1; i>=0; i--) {
             //sort all items into different ArrayLists a/c to date
 
             DatabaseRow row = databaseItems.get(i);
-            String datetime = row.getDateTime();
-            System.out.println("ACTIVTIY LOG STRING DATE TIME:" + datetime);
-            String date = datetime.substring(8,10) + " " + months[Integer.parseInt(datetime.substring(5,7)) - 1];
+            String hashID = row.getHashID();
+            if (hashID.equals(LoginActivity.clickedProductHashID)) {
+                String datetime = row.getDateTime();
+                String date = datetime.substring(8, 10) + " " + months[Integer.parseInt(datetime.substring(5, 7)) - 1];
 
-            List<DatabaseRow> tempItem;
-            if (listDataChild.containsKey(date)){
-                tempItem = listDataChild.get(date);
-            }else {
-                tempItem = new ArrayList<>();
-                listDataHeaders.add(date);
+                List<DatabaseRow> tempItem;
+                if (listDataChild.containsKey(date)) {
+                    tempItem = listDataChild.get(date);
+                } else {
+                    tempItem = new ArrayList<>();
+                    listDataHeaders.add(date);
+                }
+                tempItem.add(row);
+                listDataChild.put(date, tempItem);
+
             }
-            tempItem.add(row);
-            listDataChild.put(date, tempItem);
+
         }
 
-        logCustomAdapter = new ActivityLogCustomAdapter(getContext(), listDataHeaders, listDataChild);
-
+        ActivityLogCustomAdapter logCustomAdapter = new ActivityLogCustomAdapter(getContext(), listDataHeaders, listDataChild);
+        logCustomAdapter.expandableListView = expandableListView;
         expandableListView.setAdapter(logCustomAdapter);
 
         return v;

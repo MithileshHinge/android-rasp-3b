@@ -75,12 +75,8 @@ public class LivefeedFragment extends Fragment {
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
 
-        /*spref_ip = PreferenceManager.getDefaultSharedPreferences(getContext());
-        servername = spref_ip.getString("ip_address","");*/
-
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
-        //servername =  MainActivity.jIP.getText().toString();
 
         t = new Client();
         t.start();
@@ -110,12 +106,19 @@ public class LivefeedFragment extends Fragment {
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "photo clicked", Toast.LENGTH_SHORT).show();
                 final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+
+                final File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+                if (!specificImgStorageDir.exists()) {
+                    if (!specificImgStorageDir.mkdirs()) {
+                        Log.d("App", "failed to create video directory");
+                    }
+                }
+
                 SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss");
                 Date date = new Date();
-                final String finalImageFileName = imageStorageDir.getPath() + "/" + date + ".jpg";
+                final String finalImageFileName = specificImgStorageDir.getPath() + "/" + date + ".jpg";
                 if(frame != null) {
                     try {
-
                         FileOutputStream fos = new FileOutputStream(finalImageFileName);
                         frame.compress(Bitmap.CompressFormat.PNG, 100, fos);
                         fos.close();

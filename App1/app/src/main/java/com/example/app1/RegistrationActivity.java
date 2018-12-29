@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -29,6 +30,7 @@ public class RegistrationActivity extends AppCompatActivity {
     public static Set<String> hashIDList = new HashSet<String>();
     public static Set<String> productNameList = new HashSet<String>();
     public static SharedPreferences spref_list;
+    public static int productSerialNo;
 
 
     @Override
@@ -125,8 +127,8 @@ public class RegistrationActivity extends AppCompatActivity {
         View subView = inflater.inflate(R.layout.add_product_layout, null);
 
         final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
-        final EditText quantityField = (EditText)subView.findViewById(R.id.enter_quantity);
-
+        final EditText hashIDField = (EditText)subView.findViewById(R.id.enter_hashID);
+        final EditText emailIDField = (EditText)subView.findViewById(R.id.enter_email);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add new product");
@@ -137,14 +139,24 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String name = nameField.getText().toString();
-                final String hashID = quantityField.getText().toString();
+                final String hashID = hashIDField.getText().toString();
+                final String email = emailIDField.getText().toString();
 
-                if(TextUtils.isEmpty(name) || hashID.length() <= 0){
-                    Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
-                } else if(hashIDList.contains(hashID)){
+                if(TextUtils.isEmpty(name)){
+                    Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your reference name", Toast.LENGTH_LONG).show();
+                    nameField.setError("Enter a reference name");
+                }else if(hashID.length() <= 0){
+                    Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your hashID", Toast.LENGTH_LONG).show();
+                    hashIDField.setError("Enter a valid hashID");
+                }else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+                    Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your email address", Toast.LENGTH_LONG).show();
+                    emailIDField.setError("Enter a valid email address");
+                }else if(hashIDList.contains(hashID)){
                     Toast.makeText(RegistrationActivity.this, "hashID already exists. Check again !", Toast.LENGTH_LONG).show();
+                    hashIDField.setError("hash ID already exists");
                 } else if(productNameList.contains(name)){
                     Toast.makeText(RegistrationActivity.this, "Name already exists. Please choose another name !", Toast.LENGTH_LONG).show();
+                    nameField.setError("Reference name already exists");
                 } else{
                     /*Product newProduct = new Product(name, hashID);
                     newProduct.setIfLoggedIn(false);
@@ -152,13 +164,24 @@ public class RegistrationActivity extends AppCompatActivity {
                     productNameList.add(name);
                     hashIDList.add(hashID);
 
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor edit = sharedPreferences.edit();
+                    productSerialNo = sharedPreferences.getInt("serialNo",1);
+
                     //TODO: store allProducts
                     SharedPreferences.Editor editor = getSharedPreferences(hashID,MODE_PRIVATE).edit();
                     editor.clear();
                     editor.putString("name", name);
                     editor.putString("hashID",hashID);
+                    editor.putString("email",email);
+                    editor.putInt("serialNo",productSerialNo);
                     editor.apply();
 
+                    System.out.println("............serial number for new product = "+productSerialNo);
+                    productSerialNo++;
+
+                    edit.putInt("serialNo",productSerialNo);
+                    edit.apply();
 
                     SharedPreferences.Editor editor2 = spref_list.edit();
                     editor2.clear();

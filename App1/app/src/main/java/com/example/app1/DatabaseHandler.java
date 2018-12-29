@@ -93,7 +93,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // return contact
         return rowEntry;
     }
-
     // Getting All Contacts
     public List<DatabaseRow> getAllRows() {
         List<DatabaseRow> rows = new ArrayList<DatabaseRow>();
@@ -113,7 +112,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 rowEntry.setBookmarked(cursor.getInt(3));
                 rowEntry.setThumbpath(cursor.getString(4));
                 rowEntry.setHashID(cursor.getString(5));
-
 
                 // Adding contact to list
                 rows.add(rowEntry);
@@ -135,14 +133,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_THUMBPATH, rowEntry.getThumbpath());
         values.put(KEY_HASHID,rowEntry.getHashID());
 
+
         // updating row
         return db.update(TABLE_ACTIVITY_LOG, values, KEY_ID + " = ?", new String[]{String.valueOf(rowEntry.getID())});
     }
 
     // Deleting single contact
-    public void deleteRow(DatabaseRow rowEntry) {
+    public void deleteRow(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_ACTIVITY_LOG, KEY_ID + " = ?", new String[]{String.valueOf(rowEntry.getID())});
+        db.delete(TABLE_ACTIVITY_LOG, KEY_ID + " = ?", new String[]{String.valueOf(id)});
+        System.out.println("DATABASE HANDLER ROW DELETED...........");
         db.close();
     }
 
