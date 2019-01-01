@@ -81,6 +81,8 @@ public class LoginActivity extends AppCompatActivity {
         System.out.println("reg id = "+ clickedProductHashID);
         serverName = RegistrationActivity.serverName;
 
+        //proceed();
+
         new Thread(new Runnable() {
             @Override
             public void run() {

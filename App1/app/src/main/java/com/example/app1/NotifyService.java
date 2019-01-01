@@ -30,7 +30,14 @@ public class NotifyService extends FirebaseMessagingService {
     final static String ACTION = "NotifyServiceAction";
     final static String STOP_SERVICE = "";
     final static int RQS_STOP_SERVICE = 1;
-    public static final byte BYTE_FACEFOUND_VDOGENERATING = 1, BYTE_FACEFOUND_VDOGENERATED = 2, BYTE_ALERT1 = 3, BYTE_ALERT2 = 4 , BYTE_ABRUPT_END =5, BYTE_LIGHT = 6, BYTE_CAMERA_INACTIVE = 7;
+    public static final byte BYTE_FACEFOUND_VDOGENERATING = 1,
+            BYTE_FACEFOUND_VDOGENERATED = 2,
+            BYTE_ALERT1 = 3,
+            BYTE_ALERT2 = 4,
+            BYTE_ABRUPT_END =5,
+            BYTE_LIGHT = 6,
+            BYTE_CAMERA_INACTIVE = 7,
+            BYTE_MEMORY_ALERT = 8;
 
     NotifyServiceReceiver notifyServiceReceiver;
 
@@ -80,18 +87,23 @@ public class NotifyService extends FirebaseMessagingService {
 
         String notifVdoTitle = "Something's happening at your door! Video generated. : "+corresProduct;
         String notifVdoText = "Tap to watch video.";
+
         final String lightTitle = "Lights have changed : "+ corresProduct;
         final String camTitle = "Camera Inactive alert : ";
+        final String memoryTitle = "Memory alert : ";
+        final String memoryText = "Check out on the memory left on your Magic Eye system";
 
         final NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notif).setContentTitle(notifTitle).setContentText(notifText).setAutoCancel(true);
         final NotificationCompat.Builder notifVdoBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_video).setContentTitle(notifVdoTitle).setContentText(notifVdoText).setAutoCancel(true);
         final NotificationCompat.Builder lightBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(lightTitle).setAutoCancel(true);
         final NotificationCompat.Builder camBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(camTitle).setAutoCancel(true);
+        final NotificationCompat.Builder memoryBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(memoryTitle).setContentText(memoryText).setAutoCancel(true);
 
         notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         notifVdoBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         lightBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
         camBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+        memoryBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -249,6 +261,10 @@ public class NotifyService extends FirebaseMessagingService {
                        camBuilder.setContentTitle(camTitle + corresProduct);
                         notificationManager.notify(MY_NOTIFICATION_ID,camBuilder.build());
 
+                    }
+                    if(p == BYTE_MEMORY_ALERT){
+                        memoryBuilder.setContentTitle(memoryTitle + corresProduct);
+                        notificationManager.notify(MY_NOTIFICATION_ID,memoryBuilder.build());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

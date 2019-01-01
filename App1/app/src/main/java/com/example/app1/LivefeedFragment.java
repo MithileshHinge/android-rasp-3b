@@ -1,5 +1,6 @@
 package com.example.app1;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioFormat;
@@ -10,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +65,8 @@ public class LivefeedFragment extends Fragment {
     private static int msgPort = 7676;
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13;
 
+    public static ToggleButton Alarm_button;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,7 +75,7 @@ public class LivefeedFragment extends Fragment {
         img = (ImageView) v.findViewById(R.id.imageView);
         Button photo_button = (Button)  v.findViewById(R.id.push_button);
         ToggleButton Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
-        ToggleButton Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
+        Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
 
@@ -190,26 +194,58 @@ public class LivefeedFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, final boolean isChecked) {
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(isChecked){
-                            while (!LivefeedFragment.sendMsg(BYTE_START_ALARM)){}
-                            System.out.println(".................ALARM BUTTON PRESSED............");
-                            //Toast.makeText(v.getContext(), "Alarm Blown !", Toast.LENGTH_LONG).show();
-                        }else{
+                if(isChecked){
+                    System.out.println(".................ALARM BUTTON PRESSED............");
+                    blowAlarmDialogBox();
+                }else{
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
                             while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){}
                             System.out.println("....alarm off");
-                            //Toast.makeText(v.getContext(), "Alarm Stopped !", Toast.LENGTH_LONG).show();
                         }
-                    }
-                }).start();
+                    });
+
+                }
             }
         });
 
         return v;
     }
 
+    public void blowAlarmDialogBox() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Alarm Alert !");
+        builder.setMessage("Are you sure you want to blow the Alarm ?");
+        builder.create();
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Toast.makeText(getContext(), "Alarm blown", Toast.LENGTH_LONG).show();
+                System.out.println("........yes clicked.....");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (!LivefeedFragment.sendMsg(BYTE_START_ALARM)){}
+                        System.out.println("....alarm on");
+                    }
+                });
+                LivefeedFragment.Alarm_button.setChecked(true);
+            }
+        });
+
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Toast.makeText(getContext(), "Task cancelled", Toast.LENGTH_LONG).show();
+                System.out.println("........no clicked.....");
+                LivefeedFragment.Alarm_button.setChecked(false);
+            }
+        });
+        builder.show();
+    }
 
     public void startStreaming()
     {

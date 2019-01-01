@@ -70,6 +70,7 @@ public class NotifActivity extends AppCompatActivity {
         jVV.setMediaController(new MediaController(this));
 
         videoNotifID = intent.getIntExtra("video_notif_id", -1);
+        videoNotifID = videoNotifID%100;
         hashID = intent.getStringExtra("HashID");
 
         if (videoNotifID != -1) {
