@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
@@ -42,18 +43,13 @@ public class Client extends Thread {
             socket.setSoTimeout(500);
             udpSocket = new DatagramSocket();
 
-            /*byte[] handshakeBuf = new byte[256];
+            //UDP Hole-punching
+            byte[] handshakeBuf = new byte[256];
             DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
-            while(true) {
+            for (int i=0; i<10; i++){
                 System.out.println("Sending handshake....");
                 udpSocket.send(handshakePacket);
-                try {
-                    socket.getInputStream().read();
-                    break;
-                } catch (SocketTimeoutException e){
-                    e.printStackTrace();
-                }
-            }*/
+            }
 
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
             dOut.writeInt(udpSocket.getLocalPort());
