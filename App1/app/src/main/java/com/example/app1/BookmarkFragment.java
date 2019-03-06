@@ -43,7 +43,7 @@ public class BookmarkFragment extends Fragment {
 
         if (ImageFragment.data.size() == 0) {
             try {
-                for (File fileEntry : ImageFragment.imageStorageDir.listFiles()) {
+                for (File fileEntry : ImageFragment.specificImgStorageDir.listFiles()) {
                     System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     System.out.println(fileEntry);
                     System.out.println(fileEntry.getPath());
@@ -51,7 +51,7 @@ public class BookmarkFragment extends Fragment {
                         System.out.println("continued");
                         continue;
                     }
-
+                    System.out.println("filename = "+fileEntry.getName());
                     String extension = (fileEntry.getName()).split("\\.")[1];
                     ImageFragment.checkEntry.add(fileEntry);
                     if (extension.equals("jpg")) {

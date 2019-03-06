@@ -96,13 +96,18 @@ public class LoginActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            SharedPreferences.Editor edit = getSharedPreferences(clickedProductHashID,MODE_PRIVATE).edit();
                             if(i==5) {
+                                fcmTokenSent = false;
                                 Toast.makeText(context, "System not registered", Toast.LENGTH_LONG).show();
                                 System.out.println("............System not registered.............");
                             } else if(i == 1) {
+                                fcmTokenSent = true;
                                 Toast.makeText(context, "System already registered", Toast.LENGTH_LONG).show();
                                 System.out.println("............System already registered.............");
                             }
+                            edit.putBoolean("fcmTokenSent",fcmTokenSent);
+                            edit.apply();
                         }
                     });
 
@@ -181,11 +186,10 @@ public class LoginActivity extends AppCompatActivity {
 
         System.out.println("to store: hashID = "+clickedProductHashID+" username = "+username+" password = "+password+" logged In state = "+_loggedIn.isChecked());
 
-        SharedPreferences.Editor editor = getSharedPreferences(clickedProductHashID, MODE_PRIVATE).edit();
+        final SharedPreferences.Editor editor = getSharedPreferences(clickedProductHashID, MODE_PRIVATE).edit();
         editor.putString("username",username);
         editor.putString("password",password);
         editor.putBoolean("fcmTokenSent",fcmTokenSent);
-
         if(_loggedIn.isChecked())
             editor.putBoolean("loggedIn",true);
         else
@@ -200,6 +204,13 @@ public class LoginActivity extends AppCompatActivity {
                     if (in.read() == 9) {
                         //Toast.makeText(getBaseContext(), "Connection successfully established !", Toast.LENGTH_LONG).show();
                         System.out.println("Connection successfully established !");
+
+                        // TODO: Get the local IP of system
+                        /*DataInputStream dIn = new DataInputStream(in);
+                        String localIP = dIn.readUTF();
+                        editor.putString("sysLocalIP",localIP);
+                        editor.apply();*/
+
                         while (true) {
                             try {
                                 in.read();
@@ -326,7 +337,7 @@ public class LoginActivity extends AppCompatActivity {
                         System.out.println("....sending email ID = "+emailID);
                         dOut.writeUTF(fcmToken);
                         dOut.flush();
-                        fcmTokenSent = true;
+                        //fcmTokenSent = true;
                         dOut.writeUTF(emailID);
                         dOut.flush();
                     }

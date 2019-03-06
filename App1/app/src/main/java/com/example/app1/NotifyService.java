@@ -90,14 +90,14 @@ public class NotifyService extends FirebaseMessagingService {
 
         final String lightTitle = "Lights have changed : "+ corresProduct;
         final String camTitle = "Camera Inactive alert : ";
-        final String memoryTitle = "Memory alert : ";
-        final String memoryText = "Check out on the memory left on your Magic Eye system";
+        final String memoryTitle = "Low storage space alert :  ";
+        //final String memoryText = "Check out on the memory left on your Magic Eye system";
 
         final NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notif).setContentTitle(notifTitle).setContentText(notifText).setAutoCancel(true);
         final NotificationCompat.Builder notifVdoBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_video).setContentTitle(notifVdoTitle).setContentText(notifVdoText).setAutoCancel(true);
         final NotificationCompat.Builder lightBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(lightTitle).setAutoCancel(true);
         final NotificationCompat.Builder camBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(camTitle).setAutoCancel(true);
-        final NotificationCompat.Builder memoryBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(memoryTitle).setContentText(memoryText).setAutoCancel(true);
+        final NotificationCompat.Builder memoryBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(memoryTitle).setAutoCancel(true);
 
         notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         notifVdoBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -263,7 +263,14 @@ public class NotifyService extends FirebaseMessagingService {
 
                     }
                     if(p == BYTE_MEMORY_ALERT){
+                        int memoryspace = json.getInt("%memory");
                         memoryBuilder.setContentTitle(memoryTitle + corresProduct);
+                        if(memoryspace == 90)
+                            memoryBuilder.setContentText("Your storage space is " + memoryspace + "% full. ");
+                        else {
+                            memoryBuilder.setContentTitle("System      : " + corresProduct);
+                            memoryBuilder.setContentText("Your storage space was " + memoryspace + "% full. ");
+                        }
                         notificationManager.notify(MY_NOTIFICATION_ID,memoryBuilder.build());
                     }
                 } catch (JSONException e) {

@@ -204,7 +204,7 @@ public class LivefeedFragment extends Fragment {
                             while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){}
                             System.out.println("....alarm off");
                         }
-                    });
+                    }).start();
 
                 }
             }
@@ -231,7 +231,7 @@ public class LivefeedFragment extends Fragment {
                         while (!LivefeedFragment.sendMsg(BYTE_START_ALARM)){}
                         System.out.println("....alarm on");
                     }
-                });
+                }).start();
                 LivefeedFragment.Alarm_button.setChecked(true);
             }
         });

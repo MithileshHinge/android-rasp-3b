@@ -24,13 +24,13 @@ public class ImageFragment extends Fragment {
     private Context context;
     public static List<BookmarkedDatabaseRow> data = new ArrayList<>();
     public static List<File> checkEntry = new ArrayList<>();
-    public static File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+    public static File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures"), specificImgStorageDir;
     String hashID;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.image_fragment,container,false);
         data = new ArrayList<>();
-        File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+        specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
         hashID = LoginActivity.clickedProductHashID;
 
         getActivity().setTitle("Pictures");

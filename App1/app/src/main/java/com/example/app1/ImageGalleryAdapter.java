@@ -352,17 +352,16 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                             System.out.println(".............vdo removed into bkmrkVideos................");
                         }
                         System.out.println("...................no of bkmrkVideos after removing checked change..................." + bkmrkVideos.size());
-
-                        /*int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
-                        BookmarkedDatabaseRow row = MainActivity.bookmarkedDatabaseHandler.getRowFromUrl(RecordingFragment.data.get(itemPosition).getUrl());
-                        if(row.getHashID().equals(LoginActivity.clickedProductHashID)){
-                            System.out.println(".............bkmrkVideos.size = "+bkmrkVideos.size());
-                            bkmrkVideos.remove(row);
-                            System.out.println(".............bkmrkVideos.size = "+bkmrkVideos.size());
-                        }
+                    }
+                    /*else if(classSelector == 2) {
+                        int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
+                        BookmarkedDatabaseRow row = bkmrkVideos.get(itemPosition);
                         row.setBkmrk(false);
-                        MainActivity.bookmarkedDatabaseHandler.updateRow(row);*/
-                    } else if(classSelector == 3) {
+                        if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkVideos.remove(row);
+                        MainActivity.bookmarkedDatabaseHandler.updateRow(row);
+
+                    }*/else if(classSelector == 3) {
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         BookmarkedDatabaseRow tempStore = bkmrkImages.get(itemPosition);
                         if(bkmrkImages.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
@@ -385,6 +384,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         adapter.imageRecyclerView = imageRecyclerView;
                         imageRecyclerView.setAdapter(adapter);
                     }
+
                 }
             }catch(NullPointerException n){
                 Toast.makeText(context, "Cannot Bookmark file!", Toast.LENGTH_SHORT).show();

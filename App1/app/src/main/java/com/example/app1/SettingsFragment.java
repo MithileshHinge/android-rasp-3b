@@ -34,12 +34,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         addPreferencesFromResource(R.xml.settings_preferences);
 
         Preference p2 = getPreferenceScreen().findPreference("key4");
-        SharedPreferences spref_mode = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = spref_mode.edit();
+        SharedPreferences spref = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = spref.edit();
         if(p2 instanceof ListPreference){
             ListPreference listPref = (ListPreference) p2;
 
-            String mode = spref_mode.getString("modeType",null);
+            String mode = spref.getString("modeType",null);
             System.out.println("...........mode = "+mode);
             i=0;
             int index = 10;
@@ -65,32 +65,38 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         Preference p3 = getPreferenceScreen().findPreference("keyy1");
         if (p3 instanceof EditTextPreference) {
-            SharedPreferences spref_user = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-            p3.setSummary(spref_user.getString("username",""));
+            //SharedPreferences spref_user = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+            p3.setSummary(spref.getString("username",""));
         }
 
         Preference p4 = getPreferenceScreen().findPreference("keyy2");
         if (p4 instanceof EditTextPreference) {
-            SharedPreferences spref_product = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-            p4.setSummary(spref_product.getString("name",""));
+            //SharedPreferences spref_product = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+            p4.setSummary(spref.getString("name",""));
         }
 
         Preference p5 = getPreferenceScreen().findPreference("keyy3");
         if (p5 instanceof EditTextPreference) {
-            SharedPreferences spref_email = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-            p5.setSummary(spref_email.getString("email",""));
+            //SharedPreferences spref_email = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+            p5.setSummary(spref.getString("email",""));
+        }
+
+        Preference p8 = getPreferenceScreen().findPreference("keyy4");
+        if (p8 instanceof EditTextPreference) {
+            //SharedPreferences spref_email = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+            p8.setSummary(spref.getString("sysLocalIP",""));
         }
 
         Preference p6 = getPreferenceScreen().findPreference("key1");
-        SharedPreferences spref_mobNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-        boolean mobNotif = spref_mobNotif.getBoolean("mobNotif",false);
+        //SharedPreferences spref_mobNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+        boolean mobNotif = spref.getBoolean("mobNotif",false);
         if(p6 instanceof SwitchPreferenceCompat){
             ((SwitchPreferenceCompat) p6).setChecked(mobNotif);
         }
 
         Preference p7 = getPreferenceScreen().findPreference("key5");
-        SharedPreferences spref_emailNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
-        boolean emailNotif = spref_emailNotif.getBoolean("emailNotif",false);
+        //SharedPreferences spref_emailNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+        boolean emailNotif = spref.getBoolean("emailNotif",false);
         if(p7 instanceof SwitchPreferenceCompat){
             ((SwitchPreferenceCompat) p7).setChecked(emailNotif);
         }

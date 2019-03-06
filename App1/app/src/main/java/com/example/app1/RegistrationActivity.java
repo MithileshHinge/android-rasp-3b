@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    public static String serverName = "192.168.1.104";
+    public static String serverName = "13.233.111.181";
     public static RecyclerView productView;
     public static List<Product> allProducts = new ArrayList<>();
     public static String clickedItem;

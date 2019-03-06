@@ -21,7 +21,7 @@ public class Client extends Thread {
     private Socket socket;
     private int udpPort = 7663;
     private int port = 7666;
-    private boolean livefeed = true;
+    private volatile boolean livefeed = true;
     // private InputStream in;
     //private OutputStream out;
     private static SharedPreferences spref_ip;
@@ -40,7 +40,7 @@ public class Client extends Thread {
             while(!LivefeedFragment.sendMsg(LivefeedFragment.BYTE_START_LIVEFEED)){}
 
             socket = new Socket(serverName, port);
-            socket.setSoTimeout(500);
+            socket.setSoTimeout(2000);
             udpSocket = new DatagramSocket();
 
             //UDP Hole-punching
@@ -54,6 +54,8 @@ public class Client extends Thread {
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
             dOut.writeInt(udpSocket.getLocalPort());
             dOut.flush();
+            dOut.writeUTF(LoginActivity.clickedProductHashID);
+            dOut.flush();
             int m = socket.getInputStream().read();
             if( m != 1){
                 Log.d("System is offline","");
@@ -61,7 +63,7 @@ public class Client extends Thread {
                 return;
             }
 
-            while (true) {
+            while (livefeed) {
 
                 byte[] buf = new byte[64000];
                 DatagramPacket imgPacket = new DatagramPacket(buf, buf.length);
@@ -79,13 +81,11 @@ public class Client extends Thread {
                 LivefeedFragment.frameChanged = true;
 
                 System.out.println("Frame received........");
-                if (!livefeed) {
-                    livefeed = true;
-                    socket.close();
-                    System.out.println("CLIENT BANDA JHALA");
-                    return;
-                }
+
             }
+            livefeed = true;
+            socket.close();
+            System.out.println("CLIENT BANDA JHALA");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,6 +103,7 @@ public class Client extends Thread {
     public void end(){
 
         livefeed = false;
+        System.out.println("live feed false keli");
     }
 }
 
