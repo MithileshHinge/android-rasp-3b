@@ -69,5 +69,13 @@ public class BookmarkedDatabaseRow {
         _hashID = hashID;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        BookmarkedDatabaseRow that = (BookmarkedDatabaseRow) o;
+        if (_url != null ? !_url.equals(that._url) : that._url != null) return false;
+        return _hashID != null ? _hashID.equals(that._hashID) : that._hashID == null;
+    }
 }

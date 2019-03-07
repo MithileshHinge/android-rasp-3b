@@ -262,6 +262,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         case 1:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);
                             imgUrl = ImageFragment.data.get(itemPosition).getUrl();
+                            System.out.println(imgUrl);
                             System.out.println("URI : " + context.getApplicationContext().getPackageName()+ ".provider");
                             System.out.println("External Dir : " + ImageFragment.imageStorageDir.toString());
                             imgURI = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName() + ".provider", new File(imgUrl));
@@ -273,7 +274,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         case 2:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);
                             imgUrl = RecordingFragment.data.get(itemPosition).getUrl();
-                            imgURI = FileProvider.getUriForFile(context,RecordingFragment.vdoDirectory.getAbsolutePath().toString(),new File(imgUrl));
+                            imgURI = FileProvider.getUriForFile(context,RecordingFragment.specificVdoDir.getAbsolutePath().toString(),new File(imgUrl));
                             System.out.println("ONCLICK" + imgUrl);
                             /*galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video*//*");*/
                             galleryIntent.setDataAndType(imgURI, "video/*");
@@ -313,6 +314,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
         public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
             try {
                 if (isChecked) {
+                    System.out.println("bookmarked for class selector = "+classSelector);
                     if (classSelector == 1) {
                         //things for image gallery when bookmarked
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
@@ -325,43 +327,27 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         RecordingFragment.data.get(itemPosition).setBkmrk(true);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(RecordingFragment.data.get(itemPosition));
-                        System.out.println("...............RecordingFragment.data.get(itemPosition).getHashID().............."+RecordingFragment.data.get(itemPosition).getHashID());
-                        System.out.println("...............Login.hashID.................."+LoginActivity.clickedProductHashID);
                         if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID)) {
                             bkmrkVideos.add(RecordingFragment.data.get(itemPosition));
-                            System.out.println(".............vdo added into bkmrkVideos................");
                         }
-                        System.out.println("...................no of bkmrkVideos after checked change..................." + bkmrkVideos.size());
                     }
                 } else {
+                    System.out.println("unbookmarked for class selector = "+classSelector);
                     if (classSelector == 1) {
-                        //things for image gallery when not bookmarked
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
-                        ImageFragment.data.get(itemPosition).setBkmrk(false);
-                        MainActivity.bookmarkedDatabaseHandler.updateRow(ImageFragment.data.get(itemPosition));
-                        if(ImageFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
-                            bkmrkImages.remove(ImageFragment.data.get(itemPosition));
+                        BookmarkedDatabaseRow row = ImageFragment.data.get(itemPosition);
+                        if(row.getHashID().equals(LoginActivity.clickedProductHashID))
+                            bkmrkImages.remove(row);
+                        row.setBkmrk(false);
+                        MainActivity.bookmarkedDatabaseHandler.updateRow(row);
                     } else if(classSelector == 2) {
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
-                        RecordingFragment.data.get(itemPosition).setBkmrk(false);
-                        MainActivity.bookmarkedDatabaseHandler.updateRow(RecordingFragment.data.get(itemPosition));
-                        System.out.println("...............RecordingFragment.data.get(itemPosition).getHashID().............."+RecordingFragment.data.get(itemPosition).getHashID());
-                        System.out.println("...............Login.hashID.................."+LoginActivity.clickedProductHashID);
-                        if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID)) {
-                            bkmrkVideos.remove(RecordingFragment.data.get(itemPosition));
-                            System.out.println(".............vdo removed into bkmrkVideos................");
-                        }
-                        System.out.println("...................no of bkmrkVideos after removing checked change..................." + bkmrkVideos.size());
-                    }
-                    /*else if(classSelector == 2) {
-                        int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
-                        BookmarkedDatabaseRow row = bkmrkVideos.get(itemPosition);
-                        row.setBkmrk(false);
-                        if(RecordingFragment.data.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                        BookmarkedDatabaseRow row = RecordingFragment.data.get(itemPosition);
+                        if(row.getHashID().equals(LoginActivity.clickedProductHashID))
                             bkmrkVideos.remove(row);
+                        row.setBkmrk(false);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(row);
-
-                    }*/else if(classSelector == 3) {
+                    } else if(classSelector == 3) {
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         BookmarkedDatabaseRow tempStore = bkmrkImages.get(itemPosition);
                         if(bkmrkImages.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
@@ -375,7 +361,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                     } else if(classSelector == 4){
                         int itemPosition = imageRecyclerView.getChildLayoutPosition((View) compoundButton.getParent());
                         BookmarkedDatabaseRow row = bkmrkVideos.get(itemPosition);
-                        if(bkmrkVideos.get(itemPosition).getHashID().equals(LoginActivity.clickedProductHashID))
+                        if(row.getHashID().equals(LoginActivity.clickedProductHashID))
                             bkmrkVideos.remove(row);
                         row.setBkmrk(false);
                         MainActivity.bookmarkedDatabaseHandler.updateRow(row);
