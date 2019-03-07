@@ -32,7 +32,6 @@ public class ImageFragment extends Fragment {
         data = new ArrayList<>();
         specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
         hashID = LoginActivity.clickedProductHashID;
-
         getActivity().setTitle("Pictures");
         context = getContext();
         try {
@@ -62,8 +61,21 @@ public class ImageFragment extends Fragment {
 
                     data.add(bookmarkedDatabaseRow);
 
-                    if (bookmarkedDatabaseRow.getBkmrk()){
-                        ImageGalleryAdapter.bkmrkImages.add(bookmarkedDatabaseRow);
+                    if (bookmarkedDatabaseRow.getBkmrk()) {
+                        Boolean present = false;
+                        String url2 = bookmarkedDatabaseRow.getUrl();
+                        for(BookmarkedDatabaseRow row : ImageGalleryAdapter.bkmrkImages){
+                            String url1 = row.getUrl();
+                            if(url1.equals(url2)){
+                                present = true;
+                                break;
+                            }else
+                                continue;
+
+                        }
+                        if(!present){
+                            ImageGalleryAdapter.bkmrkImages.add(bookmarkedDatabaseRow);
+                        }
                     }
                 }
             }
