@@ -57,9 +57,8 @@ public class RecordingFragment extends Fragment {
                             String url1 = row.getUrl();
                             if(url1.equals(url2)){
                                 present = true;
-                                break;
-                            }else
                                 continue;
+                            }
 
                         }
                         if(!present){

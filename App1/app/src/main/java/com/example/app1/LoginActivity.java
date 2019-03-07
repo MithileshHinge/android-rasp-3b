@@ -213,24 +213,13 @@ public class LoginActivity extends AppCompatActivity {
 
                         while (true) {
                             try {
-                                int p = in.read();
-                                if(p == -1)
-                                    break;
+                                in.read();
                                 out.write(1);
                                 out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                break;
                             }
                         }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
-                                startActivityForResult(intent, 0);
-                                finish();
-                            }
-                        });
                     } else
                         System.out.println("...system offline...");
                 } catch (IOException e) {
@@ -445,8 +434,8 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    public void preceed(){
-        Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
+    public void proceed(){
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivityForResult(intent, 0);
         finish();
     }
