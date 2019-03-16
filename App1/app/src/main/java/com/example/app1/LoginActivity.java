@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,8 @@ public class LoginActivity extends AppCompatActivity {
     public static String fcmToken, emailID;
 
     private static Context context;
+    public static Thread connect;
+    public Boolean registered;
 
     //TODO : Remove this portion ; just for testing
 
@@ -70,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.inject(this);
 
         context = this;
+        registered = false;
 
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
         for (Product product : RegistrationActivity.allProducts) {
@@ -89,9 +93,11 @@ public class LoginActivity extends AppCompatActivity {
                 try {
                     connServerSocket = new Socket(serverName,connServerPort);
                     // Sending Reg ID
+                    System.out.println("ip address ------ "+connServerSocket.getLocalAddress().getHostName()+"  "+connServerSocket.getLocalAddress());
                     DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
                     dOut.writeUTF(clickedProductHashID);
                     final int i = connServerSocket.getInputStream().read();
+                    registered = true;
                     System.out.println("....registration variable = "+i);
                     runOnUiThread(new Runnable() {
                         @Override
@@ -115,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getBaseContext(), "Please check your internet connection !", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "No internet connection"+'\n'+"or the server is currently down", Toast.LENGTH_LONG).show();
                             System.out.println("socket connection problem. Could not flush hash ID");
                             finish();
                         }
@@ -146,6 +152,10 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }*/
 
+        while(!registered){
+            _loginButton.setEnabled(false);
+        }
+        _loginButton.setEnabled(true);
         _loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +167,12 @@ public class LoginActivity extends AppCompatActivity {
 
     public void login() {
         Log.d(TAG, "Login");
+
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
+                R.style.AppTheme);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
 
         if(!checkCredentials()) {
             onLoginFailed();
@@ -196,31 +212,59 @@ public class LoginActivity extends AppCompatActivity {
             editor.putBoolean("loggedIn",false);
         editor.apply();
 
-        new Thread(new Runnable() {
+        //Toast.makeText(getBaseContext(), "Connection successfully established !", Toast.LENGTH_LONG).show();
+
+        _loginButton.setEnabled(false);
+
+        System.out.println("...authenticating process started...");
+
+        password = _passwordText.getText().toString();
+        username = _usernameText.getText().toString();
+
+        spref_user = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit2 = spref_user.edit();
+        edit2.putString("username",username);
+        edit2.commit();
+
+        connect = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     System.out.println("...............New thread within login started..............");
-                    if (in.read() == 9) {
+                    int p = in.read();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onLoginSuccess();
+                            progressDialog.dismiss();
+                        }
+                    });
+
+                    if (p == 9) {
                         //Toast.makeText(getBaseContext(), "Connection successfully established !", Toast.LENGTH_LONG).show();
                         System.out.println("Connection successfully established !");
 
                         // TODO: Get the local IP of system
-                        /*DataInputStream dIn = new DataInputStream(in);
-                        String localIP = dIn.readUTF();
-                        editor.putString("sysLocalIP",localIP);
-                        editor.apply();*/
+                        DataInputStream dIn = new DataInputStream(in);
+                        SettingsFragment.sysLocalIP = dIn.readUTF();
+                        editor.putString("sysLocalIP",SettingsFragment.sysLocalIP);
+                        editor.apply();
+                        System.out.println("..............system local IP = "+SettingsFragment.sysLocalIP);
 
                         while (true) {
                             try {
-                                int p = in.read();
+                                /*int p = in.read();
                                 if(p == -1)
-                                    break;
+                                    break;*/
                                 out.write(1);
                                 out.flush();
+                                Thread.sleep(10000);
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 break;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
                         }
                         runOnUiThread(new Runnable() {
@@ -231,44 +275,23 @@ public class LoginActivity extends AppCompatActivity {
                                 finish();
                             }
                         });
-                    } else
+                    } else {
                         System.out.println("...system offline...");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(context,"System is offline",Toast.LENGTH_LONG);
+                            }
+                        });
+                    }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
-        }).start();
-        //Toast.makeText(getBaseContext(), "Connection successfully established !", Toast.LENGTH_LONG).show();
-
-        _loginButton.setEnabled(false);
-
-        System.out.println("...authenticating process started...");
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-        password = _passwordText.getText().toString();
-        username = _usernameText.getText().toString();
-
-        spref_user = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit2 = spref_user.edit();
-        edit2.putString("username",username);
-        edit2.commit();
-
-        // TODO: Implement your own authentication logic here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                        System.out.println("...............Login success..............");
-                    }
-                }, 3000);
+        });
+        connect.start();
     }
 
     @Override

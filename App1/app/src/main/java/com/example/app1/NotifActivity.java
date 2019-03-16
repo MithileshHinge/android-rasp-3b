@@ -90,40 +90,80 @@ public class NotifActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                // Start login process
-                                SharedPreferences spref = getSharedPreferences(hashID,MODE_PRIVATE);
-                                String user = spref.getString("username",new String());
-                                String pass = spref.getString("password",new String());
+                                if(LoginActivity.connect == null){
+                                    System.out.println(".........................connect thread is null");
+                                    // Start login process
+                                    SharedPreferences spref = getSharedPreferences(hashID, MODE_PRIVATE);
+                                    String user = spref.getString("username", new String());
+                                    String pass = spref.getString("password", new String());
 
-                                Socket socket = new Socket(servername,connServerPort);
-                                InputStream in = socket.getInputStream();
-                                OutputStream out = socket.getOutputStream();
-                                DataInputStream dIn = new DataInputStream(in);
-                                DataOutputStream dOut = new DataOutputStream(out);
-                                dOut.writeUTF(hashID);
-                                dOut.flush();
-                                final int i = in.read();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if(i==5) {
-                                            Toast.makeText(context, "System not Registered", Toast.LENGTH_LONG).show();
-                                            System.out.println("............System not registered.............");
-                                        } else if(i == 1) {
-                                            Toast.makeText(context, "System already Registered", Toast.LENGTH_SHORT).show();
-                                            System.out.println("............System already registered.............");
+                                    Socket socket = new Socket(servername, connServerPort);
+                                    InputStream in = socket.getInputStream();
+                                    OutputStream out = socket.getOutputStream();
+                                    DataInputStream dIn = new DataInputStream(in);
+                                    DataOutputStream dOut = new DataOutputStream(out);
+                                    dOut.writeUTF(hashID);
+                                    dOut.flush();
+                                    final int i = in.read();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (i == 5) {
+                                                Toast.makeText(context, "System not Registered", Toast.LENGTH_LONG).show();
+                                                System.out.println("............System not registered.............");
+                                            } else if (i == 1) {
+                                                Toast.makeText(context, "System already Registered", Toast.LENGTH_SHORT).show();
+                                                System.out.println("............System already registered.............");
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                                dOut.writeUTF(user);
-                                dOut.flush();
-                                dOut.writeUTF(pass);
-                                dOut.flush();
-                                in.read();
-                                in.read();
+                                    dOut.writeUTF(user);
+                                    dOut.flush();
+                                    dOut.writeUTF(pass);
+                                    dOut.flush();
+                                    in.read();
+                                    in.read();
+                                }else {
+                                    if (!LoginActivity.connect.isAlive()) {
+                                        System.out.println(".........................connect thread isn't alive");
+                                        // Start login process
+                                        SharedPreferences spref = getSharedPreferences(hashID, MODE_PRIVATE);
+                                        String user = spref.getString("username", new String());
+                                        String pass = spref.getString("password", new String());
+
+                                        Socket socket = new Socket(servername, connServerPort);
+                                        InputStream in = socket.getInputStream();
+                                        OutputStream out = socket.getOutputStream();
+                                        DataInputStream dIn = new DataInputStream(in);
+                                        DataOutputStream dOut = new DataOutputStream(out);
+                                        dOut.writeUTF(hashID);
+                                        dOut.flush();
+                                        final int i = in.read();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (i == 5) {
+                                                    Toast.makeText(context, "System not Registered", Toast.LENGTH_LONG).show();
+                                                    System.out.println("............System not registered.............");
+                                                } else if (i == 1) {
+                                                    Toast.makeText(context, "System already Registered", Toast.LENGTH_SHORT).show();
+                                                    System.out.println("............System already registered.............");
+                                                }
+                                            }
+                                        });
+
+                                        dOut.writeUTF(user);
+                                        dOut.flush();
+                                        dOut.writeUTF(pass);
+                                        dOut.flush();
+                                        in.read();
+                                        in.read();
+                                    }
+                                }
 
                                 // Start Video downloading process
+
                                 while(!LivefeedFragment.sendMsg(BYTE_START_VIDEO_DOWNLOAD)){}
                                 /*SocketAddress address = new InetSocketAddress(servername,PortVdo);
                                 SocketChannel clientChannel = SocketChannel.open(address);

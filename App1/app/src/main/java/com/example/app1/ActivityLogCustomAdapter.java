@@ -99,7 +99,7 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         TextView jTVHeader = (TextView) convertView.findViewById(R.id.xGroupHeader);
         jTVHeader.setTypeface(null, Typeface.BOLD);
         jTVHeader.setText(headerTitle);
-        System.out.println("HEADER TITLE : " + headerTitle);
+        //System.out.println("HEADER TITLE : " + headerTitle);
         return convertView;
     }
 

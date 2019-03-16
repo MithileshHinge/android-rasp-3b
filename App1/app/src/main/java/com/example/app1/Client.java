@@ -6,7 +6,6 @@ package com.example.app1;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -61,7 +60,6 @@ public class Client extends Thread {
             if( m != 1){
                 Log.d("System is offline","");
                 System.out.println("............client received = "+ m);
-                Toast.makeText(MainActivity.context,"System offline",Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -103,7 +101,6 @@ public class Client extends Thread {
     }
 
     public void end(){
-
         livefeed = false;
         System.out.println("live feed false keli");
     }

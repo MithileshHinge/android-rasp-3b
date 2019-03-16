@@ -63,7 +63,7 @@ public class LivefeedFragment extends Fragment {
     private static SharedPreferences spref_ip;
 
     private static int msgPort = 7676;
-    public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13;
+    public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13, BYTE_GET_SYSIP=15;
 
     public static ToggleButton Alarm_button;
 
