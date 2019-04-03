@@ -55,5 +55,13 @@
             android:defaultValue=""
             android:enabled="false"/>
 
+        <android.support.v7.preference.EditTextPreference
+            android:key="keyy4"
+            android:title="Local IP of system"
+            android:summary="Not obtained! Login and try again."
+            android:dialogMessage="Dialog Message"
+            android:defaultValue=""
+            android:enabled="false"/>
+
     </android.support.v7.preference.PreferenceCategory>
 </android.support.v7.preference.PreferenceScreen>

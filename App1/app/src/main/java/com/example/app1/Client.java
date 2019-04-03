@@ -5,7 +5,6 @@ package com.example.app1;
  */
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,12 +55,22 @@ public class Client extends Thread {
             dOut.flush();
             dOut.writeUTF(LoginActivity.clickedProductHashID);
             dOut.flush();
-            int m = socket.getInputStream().read();
-            if( m != 1){
-                Log.d("System is offline","");
-                System.out.println("............client received = "+ m);
-                return;
+
+            while(true) {
+                int m;
+                try {
+                    m = socket.getInputStream().read();
+                }catch(SocketTimeoutException s){
+                    s.printStackTrace();
+                    continue;
+                }
+                if (m != 1) {
+                    System.out.println("System mobile not mapped............mob received = " + m);
+                    return;
+                }else
+                    break;
             }
+            socket.setSoTimeout(0);
 
             while (livefeed) {
 

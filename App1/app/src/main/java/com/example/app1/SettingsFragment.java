@@ -24,7 +24,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private String servername = RegistrationActivity.serverName;
     public SharedPreferences spref_ip;
     byte BYTE_SURV_MODE_ON = 1, BYTE_SURV_MODE_OFF = 3, BYTE_EMAIL_NOTIF_ON = 9, BYTE_EMAIL_NOTIF_OFF = 10;
-    public static String sysLocalIP;
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {

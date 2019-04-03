@@ -247,10 +247,11 @@ public class LoginActivity extends AppCompatActivity {
 
                         // TODO: Get the local IP of system
                         DataInputStream dIn = new DataInputStream(in);
-                        SettingsFragment.sysLocalIP = dIn.readUTF();
-                        editor.putString("sysLocalIP",SettingsFragment.sysLocalIP);
+                        String sysLocalIP = dIn.readUTF();
+                        sysLocalIP = sysLocalIP.substring(1);
+                        editor.putString("sysLocalIP",sysLocalIP);
                         editor.apply();
-                        System.out.println("..............system local IP = "+SettingsFragment.sysLocalIP);
+                        System.out.println("..............system local IP = "+sysLocalIP);
 
                         while (true) {
                             try {
