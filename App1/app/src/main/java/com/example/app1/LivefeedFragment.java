@@ -2,6 +2,7 @@ package com.example.app1;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -10,7 +11,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,6 +69,8 @@ public class LivefeedFragment extends Fragment {
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13, BYTE_GET_SYSIP=15;
 
     public static ToggleButton Alarm_button;
+
+    public static final int REQUEST_MICROPHONE = 1;
 
     @Nullable
     @Override
@@ -140,7 +145,91 @@ public class LivefeedFragment extends Fragment {
         Voice_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
+                if (isChecked) {
+                    if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.RECORD_AUDIO}, REQUEST_MICROPHONE);
+                        return;
+                    }
+                    status = true;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                System.out.println(".............voice button clicked...!!!");
+                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)) {
+                                }
+                                handshake_socket = new Socket(servername, AudioTcpPort);
+                                System.out.println(".............audio tcp port connected...!!!");
+                                OutputStream out = handshake_socket.getOutputStream();
+                                out.write(1);
+                                out.flush();
+                                System.out.println("P=1 PATHAVLA");
+                                InputStream in = handshake_socket.getInputStream();
+                                p = in.read();
+                                System.out.println("Tyani p pathavla P =" + p);
+                                //handshake_socket.close();
+                                System.out.println(".........HANDSHAKE SOCKET BANDA.....");
+
+                                if (p == 2) {
+                                    p = 0;
+                                    startStreaming();
+                                    System.out.println("......STREAMING START JHALI.....");
+                                }
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+
+                } else {
+                    System.out.println("STOP BUTTON");
+                    Toast.makeText(v.getContext(), "Recording stopped !", Toast.LENGTH_SHORT).show();
+                    status = false;
+                    if (recorder != null) {
+                        recorder.release();
+                        AudioSocket.close();
+                        try {
+                            handshake_socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
+        Alarm_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, final boolean isChecked) {
+
+                if (isChecked) {
+                    System.out.println(".................ALARM BUTTON PRESSED............");
+                    blowAlarmDialogBox();
+                } else {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)) {
+                            }
+                            System.out.println("....alarm off");
+                        }
+                    }).start();
+
+                }
+            }
+        });
+
+        return v;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode){
+            case REQUEST_MICROPHONE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
                     status=true;
                     new Thread(new Runnable() {
                         @Override
@@ -172,45 +261,8 @@ public class LivefeedFragment extends Fragment {
                         }
                     }).start();
 
-
-                }else{
-                    System.out.println("STOP BUTTON");
-                    Toast.makeText(v.getContext(), "Recording stopped !", Toast.LENGTH_SHORT).show();
-                    status = false;
-                    if (recorder != null) {
-                        recorder.release();
-                        AudioSocket.close();
-                        try {
-                            handshake_socket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
                 }
-            }
-        });
-
-        Alarm_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, final boolean isChecked) {
-
-                if(isChecked){
-                    System.out.println(".................ALARM BUTTON PRESSED............");
-                    blowAlarmDialogBox();
-                }else{
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){}
-                            System.out.println("....alarm off");
-                        }
-                    }).start();
-
-                }
-            }
-        });
-
-        return v;
+        }
     }
 
     public void blowAlarmDialogBox() {
