@@ -50,6 +50,8 @@ public class LivefeedFragment extends Fragment {
     public static Bitmap frame = null;
     private static Client t;
 
+    private static Listen listen;
+
     public byte[] buffer;
     public static int p;
     public static DatagramSocket AudioSocket;
@@ -81,8 +83,11 @@ public class LivefeedFragment extends Fragment {
         Button photo_button = (Button)  v.findViewById(R.id.push_button);
         ToggleButton Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
         Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
+        ToggleButton Speaker_button = (ToggleButton) v.findViewById(R.id.Speaker_button);
+
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
+        Speaker_button.setChecked(false);
 
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
@@ -156,8 +161,7 @@ public class LivefeedFragment extends Fragment {
                         public void run() {
                             try {
                                 System.out.println(".............voice button clicked...!!!");
-                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)) {
-                                }
+                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
                                 handshake_socket = new Socket(servername, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
                                 OutputStream out = handshake_socket.getOutputStream();
@@ -200,6 +204,22 @@ public class LivefeedFragment extends Fragment {
             }
         });
 
+        Speaker_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    System.out.println(".....SPEAKER BUTTON TURNED ON.....");
+                    listen = new Listen();
+                    listen.start();
+                }else{
+                    System.out.println(".....SPEAKER BUTTON TURNED OFF.....");
+                    listen.end();
+                }
+
+            }
+        });
+
+
         Alarm_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, final boolean isChecked) {
@@ -211,8 +231,7 @@ public class LivefeedFragment extends Fragment {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)) {
-                            }
+                            while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){}
                             System.out.println("....alarm off");
                         }
                     }).start();
@@ -226,17 +245,18 @@ public class LivefeedFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_MICROPHONE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    status=true;
+                    status = true;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            try{
+                            try {
                                 System.out.println(".............voice button clicked...!!!");
-                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
+                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)) {
+                                }
                                 handshake_socket = new Socket(servername, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
                                 OutputStream out = handshake_socket.getOutputStream();
@@ -249,8 +269,8 @@ public class LivefeedFragment extends Fragment {
                                 //handshake_socket.close();
                                 System.out.println(".........HANDSHAKE SOCKET BANDA.....");
 
-                                if (p == 2){
-                                    p=0;
+                                if (p == 2) {
+                                    p = 0;
                                     startStreaming();
                                     System.out.println("......STREAMING START JHALI.....");
                                 }
@@ -383,6 +403,13 @@ public class LivefeedFragment extends Fragment {
     @Override
     public void onPause() {
         t.end();
+        if (listen!=null) {
+            if (listen.isAlive()) {
+                System.out.println("........listen stopped !!!");
+                listen.end();
+            }
+        }
+
         if(status) {
             status = false;
             if (recorder != null) {
