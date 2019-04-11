@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MAGIC EYE</string>
+    <string name="app_name">ARVIS</string>
     <string name="livefeed_string">Live Feed</string>
     <string name="recording_string">Recordings</string>
     <string name="images_string">Images</string>

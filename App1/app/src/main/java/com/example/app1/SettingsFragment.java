@@ -1,7 +1,6 @@
 package com.example.app1;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.preference.EditTextPreference;
@@ -230,18 +229,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 editor.apply();
                 if(switched){
                     Toast.makeText(getContext(), "Mobile Notification started", Toast.LENGTH_SHORT).show();
-                    getActivity().startService(new Intent(getActivity(),NotifyService.class));
-                    NotifyService.notifStatus = true;
+                    //NotifyService.notifStatus = true;
                     System.out.println("NOTIF STATUS : " + NotifyService.notifStatus);
                     System.out.println(".........Notify service started.................");
                 }else{
-                    NotifyService.notifStatus = false;
+                    //NotifyService.notifStatus = false;
                     System.out.println("NOTIF STATUS : " + NotifyService.notifStatus);
                     Toast.makeText(getContext(), "Mobile Notification stopped", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent();
+                    /*Intent intent = new Intent();
                     intent.setAction(NotifyService.ACTION);
                     intent.putExtra("RQS", NotifyService.RQS_STOP_SERVICE);
-                    getActivity().sendBroadcast(intent);
+                    getActivity().sendBroadcast(intent);*/
                     System.out.println(".........Notify service stopped.................");
                 }
 

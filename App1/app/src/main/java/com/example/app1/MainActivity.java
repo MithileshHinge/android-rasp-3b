@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         activityFragmentTransaction.replace(R.id.frame, activityLogFragment);
         activityFragmentTransaction.commit();
 
+        startService(new Intent(this,NotifyService.class));
+
         spref_mode = PreferenceManager.getDefaultSharedPreferences(this);
         spref_user = PreferenceManager.getDefaultSharedPreferences(this);
 

@@ -20,7 +20,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Sibhali on 12/19/2016.
@@ -61,6 +63,7 @@ public class NotifyService extends FirebaseMessagingService {
     public static String recvdHashID, corresProduct;
     public static int serialNo;
     public static volatile boolean notifStatus;
+    List<Integer> notifIDList = new ArrayList<Integer>();
 
     //public NotifyService(){    }
 
@@ -119,18 +122,32 @@ public class NotifyService extends FirebaseMessagingService {
 
                 String imageName = null;
                 String _name = null;
+                String _date = null;
+                Long time = null;
 
                 try {
                     servername = RegistrationActivity.serverName;
-                    /*Socket client = new Socket(servername, 6667);
-                    System.out.println("CONNECTED "+"to " + servername);
-                    InputStream in = client.getInputStream();
-                    OutputStream out = client.getOutputStream();
-                    int p = in.read();*/
-                    //JSONObject json = new JSONObject(remoteMessage.getData());
                     int p = json.getInt("NotifByte");
+                    time = json.getLong("time");
                     recvdHashID = json.getString("HashId");
+                    MY_NOTIFICATION_ID = json.getInt("NotifId");
                     System.out.println("HashID" + recvdHashID);
+
+                    //Add notif ID to array list if its not already into array list
+                    if(! (p==BYTE_CAMERA_INACTIVE | p==BYTE_MEMORY_ALERT | p==BYTE_LIGHT) ) {
+                        if (notifIDList.contains(MY_NOTIFICATION_ID)) {
+                            // Notification ID is received for the second time
+                            System.out.println("..........2nd entry in array list "+MY_NOTIFICATION_ID);
+                            notifIDList.remove((Integer)MY_NOTIFICATION_ID);
+                            if (p == BYTE_ALERT1 | p == BYTE_FACEFOUND_VDOGENERATING) {
+                                return;
+                            }
+                        } else {
+                            // Notification ID is received for the first time
+                            System.out.println("..........1st entry in array list "+MY_NOTIFICATION_ID);
+                            notifIDList.add(MY_NOTIFICATION_ID);
+                        }
+                    }
 
                     SharedPreferences spref = getSharedPreferences(recvdHashID,MODE_PRIVATE);
                     corresProduct = spref.getString("name",null);
@@ -193,10 +210,10 @@ public class NotifyService extends FirebaseMessagingService {
                         notifBuilder.setContentIntent(firstPendingIntent);
 
                         /*NotificationCompat.BigPictureStyle bps = new NotificationCompat.BigPictureStyle().bigPicture(notifFrame);
-                        notifBuilder.setStyle(bps);*/
+                        notifBuilder.setStyle(bps);
 
 
-                        /*if (NotifActivity.jIV != null) {
+                        if (NotifActivity.jIV != null) {
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -208,7 +225,7 @@ public class NotifyService extends FirebaseMessagingService {
                     if(p== BYTE_FACEFOUND_VDOGENERATED || p ==BYTE_ALERT2 || p == BYTE_ABRUPT_END || p == BYTE_LIGHT){
                         /*DataInputStream dataInputStream = new DataInputStream(in);
                         String _date = dataInputStream.readUTF();*/
-                        String _date = json.getString("date");
+                        _date = json.getString("date");
                         if(p == BYTE_LIGHT){
                             _name = lightTitle;
                             db.addRow(new DatabaseRow(_name,_date, 0 , null, recvdHashID));
@@ -216,18 +233,17 @@ public class NotifyService extends FirebaseMessagingService {
                             db.addRow(new DatabaseRow(_name, _date, 0, imageName, recvdHashID));
                         }
                     }
-                    MY_NOTIFICATION_ID = json.getInt("NotifId");
-                    MY_NOTIFICATION_ID = (serialNo*100)+MY_NOTIFICATION_ID;
 
-                    System.out.println("serial no :" + serialNo);
+                    MY_NOTIFICATION_ID = (serialNo*100)+MY_NOTIFICATION_ID;
                     System.out.println("NOTIFICATION ID :" + MY_NOTIFICATION_ID);
 
                     /*out.write(9);
                     out.flush();
                     client.close();*/
 
-                    if((p == BYTE_FACEFOUND_VDOGENERATING || p == BYTE_ALERT1) && notifStatus )
-                    {
+                    if((p == BYTE_FACEFOUND_VDOGENERATING || p == BYTE_ALERT1) && notifStatus ) {
+
+                        notifBuilder.setWhen(time);
                         notificationManager.notify(MY_NOTIFICATION_ID, notifBuilder.build());
 
                     }else if(!notifStatus)
@@ -241,6 +257,7 @@ public class NotifyService extends FirebaseMessagingService {
                         int requestID = (int) System.currentTimeMillis();
                         PendingIntent secondPendingIntent = PendingIntent.getActivity(context, requestID, secondNotifIntent, 0);
                         notifVdoBuilder.setContentIntent(secondPendingIntent);
+                        notifVdoBuilder.setWhen(time);
 
                         notificationManager.notify(MY_NOTIFICATION_ID, notifVdoBuilder.build());
                         System.out.println("NOTIF 2nd GIVEN");

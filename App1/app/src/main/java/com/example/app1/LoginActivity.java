@@ -62,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private static Context context;
     public static Thread connect;
-    public Boolean registered;
 
     //TODO : Remove this portion ; just for testing
 
@@ -71,9 +70,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_screen);
         ButterKnife.inject(this);
+        _loginButton.setEnabled(false);
 
         context = this;
-        registered = false;
 
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
         for (Product product : RegistrationActivity.allProducts) {
@@ -97,11 +96,17 @@ public class LoginActivity extends AppCompatActivity {
                     DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
                     dOut.writeUTF(clickedProductHashID);
                     final int i = connServerSocket.getInputStream().read();
-                    registered = true;
                     System.out.println("....registration variable = "+i);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            _loginButton.setEnabled(true);
+                            _loginButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    login();
+                                }
+                            });
                             SharedPreferences.Editor edit = getSharedPreferences(clickedProductHashID,MODE_PRIVATE).edit();
                             if(i==5) {
                                 fcmTokenSent = false;
@@ -118,11 +123,14 @@ public class LoginActivity extends AppCompatActivity {
                     });
 
                 } catch (IOException e) {
+                    System.out.println("**************");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getBaseContext(), "No internet connection"+'\n'+"or the server is currently down", Toast.LENGTH_LONG).show();
-                            System.out.println("socket connection problem. Could not flush hash ID");
+                            System.out.println("No internet connection\"+'\\n'+\"or the server is currently down..");
+                            Toast.makeText(getBaseContext(), "No internet connection or"+'\n'+"the server is currently down", Toast.LENGTH_LONG).show();
+                            //System.out.println("No internet connection\"+'\\n'+\"or the server is currently down");
+                            context.startActivity(new Intent(context,RegistrationActivity.class));
                             finish();
                         }
                     });
@@ -151,17 +159,6 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_SIGNUP);
             finish();
         }*/
-
-        while(!registered){
-            _loginButton.setEnabled(false);
-        }
-        _loginButton.setEnabled(true);
-        _loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
 
     }
 
@@ -271,6 +268,8 @@ public class LoginActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                System.out.println("...Connection successfully established...");
+                                Toast.makeText(context,"Connection successfully established",Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
                                 startActivityForResult(intent, 0);
                                 finish();
@@ -281,7 +280,8 @@ public class LoginActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(context,"System is offline",Toast.LENGTH_LONG);
+                                System.out.println("system offline...");
+                                Toast.makeText(context,"System is offline",Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -389,14 +389,14 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if (i == 2) {
-                                Toast.makeText(getBaseContext(), "Registered", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(getBaseContext(), "Registered", Toast.LENGTH_LONG).show();
                             } else if (i == 4) {
                                 Toast.makeText(getBaseContext(), "Invalid Username or Password. Try Again !", Toast.LENGTH_LONG).show();
                             } else if (i == 3) {
                                 disableLogin();
                                 Toast.makeText(getBaseContext(), "Maximum number of failed login attempts reached !", Toast.LENGTH_LONG).show();
                             } else if (i == 6) {
-                                Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
                             } else if (i == 7) {
                                 Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
                             }
@@ -411,10 +411,7 @@ public class LoginActivity extends AppCompatActivity {
                         return;
                     }
                     System.out.println("....thread on its last stage...");
-                    /*if (in.read() == 8) {
-                        //Toast.makeText(getBaseContext(), "System is offline", Toast.LENGTH_LONG).show();
-                        System.out.println("..............System is offline..................");
-                    }*/
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (NullPointerException n) {

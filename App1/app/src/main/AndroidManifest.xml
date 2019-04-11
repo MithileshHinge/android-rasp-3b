@@ -19,13 +19,18 @@
         android:theme="@style/AppTheme"
         android:name="android.support.multidex.MultiDexApplication">
 
-        <activity android:name="com.example.app1.MainActivity"/><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+        <activity android:name="com.example.app1.MainActivity"
+            android:screenOrientation="portrait"/>
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <activity android:name=".NotifActivity"/>
-        <activity android:name=".LoginActivity"/>
+        <activity android:name=".NotifActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait"/>
         <!--<service android:name=".NotifyService"/>
         <service android:name=".MyFirebaseInstanceIDService"/>-->
-        <activity android:name=".RegistrationActivity">
+        <activity android:name=".RegistrationActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
