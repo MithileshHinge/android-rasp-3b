@@ -30,6 +30,7 @@ public class Client extends Thread {
 
     public void run() {
         try {
+
             //serverName = MainActivity.jIP.getText().toString();
             //serverName="192.168.7.2";
             /*spref_ip = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);

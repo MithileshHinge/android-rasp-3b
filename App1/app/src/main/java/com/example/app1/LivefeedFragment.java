@@ -1,5 +1,6 @@
 package com.example.app1;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -64,6 +65,7 @@ public class LivefeedFragment extends Fragment {
     private static String servername;
     private Socket handshake_socket;
     private static SharedPreferences spref_ip;
+    public ProgressDialog progressDialg;
 
     private static int msgPort = 7676;
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13, BYTE_GET_SYSIP=15;
@@ -87,6 +89,12 @@ public class LivefeedFragment extends Fragment {
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
 
+        progressDialg = new ProgressDialog(v.getContext(), R.style.AppTheme);
+        System.out.println("                 Progress Dialog initiated!!!!!!!!!!!!");
+        progressDialg.setIndeterminate(true);
+        progressDialg.setMessage("Establishing connection...");
+        progressDialg.show();
+
         t = new Client();
         t.start();
         final Handler handler = new Handler();
@@ -97,6 +105,11 @@ public class LivefeedFragment extends Fragment {
             public void run() {
                 while (true) {
                     if (frameChanged) {
+                        if(progressDialg.isShowing()){
+                            System.out.println("                     Progress dialog running");
+                            progressDialg.dismiss();
+                        }
+
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -211,7 +224,16 @@ public class LivefeedFragment extends Fragment {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)) {
+                            //while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)) {}
+                            if(LivefeedFragment.sendMsg(BYTE_STOP_ALARM)){
+                                //process completed properly
+                                System.out.println("...alarm stopped properly");
+                            }else{
+                                //give error
+                                ActivityLogFragment activityLogFragment = new ActivityLogFragment();
+                                android.support.v4.app.FragmentTransaction activityFragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                                activityFragmentTransaction.replace(R.id.frame, activityLogFragment,"ACTIVITY");
+                                activityFragmentTransaction.commit();
                             }
                             System.out.println("....alarm off");
                         }
@@ -383,6 +405,13 @@ public class LivefeedFragment extends Fragment {
     @Override
     public void onPause() {
         t.end();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!LivefeedFragment.sendMsg(BYTE_STOP_ALARM)) {}
+                System.out.println("....alarm off");
+            }
+        }).start();
         if(status) {
             status = false;
             if (recorder != null) {
@@ -401,22 +430,23 @@ public class LivefeedFragment extends Fragment {
     public static boolean sendMsg(int p){
         Socket msgSocket;
         try {
-            //spref_ip = PreferenceManager.getDefaultSharedPreferences(this);
-            //servername = spref_ip.getString("ip_address","");
             System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
             msgSocket = new Socket(RegistrationActivity.serverName, msgPort);
             OutputStream out =  msgSocket.getOutputStream();
             InputStream in = msgSocket.getInputStream();
             out.write(p);
             out.flush();
-            in.read();
-            System.out.println(".............byte sent : " + p);
+            int r = in.read();
+            System.out.println(".............byte sent : " + p +"   reply = "+r);
             try{
                 msgSocket.close();
             }catch (IOException e){
                 e.printStackTrace();
             }
-            return true;
+            if(r == -1)
+                return false;
+            else
+                return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;

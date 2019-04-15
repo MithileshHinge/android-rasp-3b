@@ -165,8 +165,7 @@ public class LoginActivity extends AppCompatActivity {
     public void login() {
         Log.d(TAG, "Login");
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme);
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,R.style.AppTheme);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
@@ -183,6 +182,8 @@ public class LoginActivity extends AppCompatActivity {
         while (validate1Done == 3) {
         }
         if (validate1Done == 2) {
+            progressDialog.dismiss();
+            //startActivity(new Intent(LoginActivity.class));
             System.out.println("...validate1Done value = 2");
             return;
         }
@@ -250,6 +251,15 @@ public class LoginActivity extends AppCompatActivity {
                         editor.apply();
                         System.out.println("..............system local IP = "+sysLocalIP);
 
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("...Connection successfully established...");
+                                Toast.makeText(context,"Connection Successfully Established !",Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        });
+
                         while (true) {
                             try {
                                 /*int p = in.read();
@@ -265,11 +275,12 @@ public class LoginActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                System.out.println("...Connection successfully established...");
-                                Toast.makeText(context,"Connection successfully established",Toast.LENGTH_LONG).show();
+                                System.out.println("...Connection broken...");
+                                Toast.makeText(context,"Connection Broken !",Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
                                 startActivityForResult(intent, 0);
                                 finish();
