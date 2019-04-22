@@ -26,6 +26,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -181,11 +183,33 @@ public class LivefeedFragment extends Fragment {
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);
                                 //handshake_socket.close();
-                                System.out.println(".........HANDSHAKE SOCKET BANDA.....");
+                                //System.out.println(".........HANDSHAKE SOCKET BANDA.....");
 
                                 if (p == 2) {
                                     p = 0;
-                                    startStreaming();
+
+                                    DataInputStream din = new DataInputStream(in);
+                                    DataOutputStream dout = new DataOutputStream(out);
+
+                                    int serverUdpPort = din.readInt();
+
+                                    DatagramSocket serverUdpSock = new DatagramSocket();
+
+                                    byte[] serverHandshakeBuf = new byte[2];
+                                    DatagramPacket serverPacket = new DatagramPacket(serverHandshakeBuf, serverHandshakeBuf.length, handshake_socket.getInetAddress(), serverUdpPort);
+                                    for (int i=0; i<10; i++) {
+                                        serverUdpSock.send(serverPacket);
+                                    }
+
+                                    dout.writeUTF(handshake_socket.getLocalAddress().getHostAddress());
+                                    dout.writeInt(serverUdpSock.getLocalPort());
+
+                                    String sysIP = din.readUTF();
+                                    int sysUdpPort = din.readInt();
+
+                                    startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
+
+                                    startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
                                     System.out.println("......STREAMING START JHALI.....");
                                 }
 
@@ -269,11 +293,31 @@ public class LivefeedFragment extends Fragment {
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);
                                 //handshake_socket.close();
-                                System.out.println(".........HANDSHAKE SOCKET BANDA.....");
+                                //System.out.println(".........HANDSHAKE SOCKET BANDA.....");
 
                                 if (p == 2){
                                     p=0;
-                                    startStreaming();
+
+                                    DataInputStream din = new DataInputStream(in);
+                                    DataOutputStream dout = new DataOutputStream(out);
+
+                                    int serverUdpPort = din.readInt();
+
+                                    DatagramSocket serverUdpSock = new DatagramSocket();
+
+                                    byte[] serverHandshakeBuf = new byte[2];
+                                    DatagramPacket serverPacket = new DatagramPacket(serverHandshakeBuf, serverHandshakeBuf.length, handshake_socket.getInetAddress(), serverUdpPort);
+                                    for (int i=0; i<10; i++) {
+                                        serverUdpSock.send(serverPacket);
+                                    }
+
+                                    dout.writeUTF(handshake_socket.getLocalAddress().getHostAddress());
+                                    dout.writeInt(serverUdpSock.getLocalPort());
+
+                                    String sysIP = din.readUTF();
+                                    int sysUdpPort = din.readInt();
+
+                                    startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
                                     System.out.println("......STREAMING START JHALI.....");
                                 }
 
@@ -321,14 +365,14 @@ public class LivefeedFragment extends Fragment {
         builder.show();
     }
 
-    public void startStreaming()
+    public void startStreaming(final InetAddress sysAddress, final int sysUdpPort)
     {
         Thread streamThread = new Thread(new Runnable(){
             @Override
             public void run()
             {
+                System.out.println("Streaming started!!!@@@..... SysIP: " + sysAddress.getHostAddress() + " , sysUdpPort: " + sysUdpPort);
                 try{
-
                     AudioSocket = new DatagramSocket();
                     Log.d("VS", "Socket Created");
                     System.out.println("DataGramSocket BANAVLA!!!!!");
@@ -336,11 +380,7 @@ public class LivefeedFragment extends Fragment {
                     minBufSize = 4096;
                     buffer = new byte[minBufSize];
 
-                    // Log.d("VS","Buffer created of size " + minBufSize);
                     DatagramPacket packet;
-
-                    final InetAddress destination = InetAddress.getByName(servername);
-                    Log.d("VS", "Address retrieved");
 
                     recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize);
                     //recorder = findAudioRecord();
@@ -355,7 +395,7 @@ public class LivefeedFragment extends Fragment {
                         minBufSize = recorder.read(buffer,0,buffer.length);
 
                         //putting buffer in the packet
-                        packet = new DatagramPacket(buffer,buffer.length,destination,AudioPort);
+                        packet = new DatagramPacket(buffer,buffer.length, sysAddress, sysUdpPort);
 
                         AudioSocket.send(packet);
                         System.out.println("SENDING DATA");

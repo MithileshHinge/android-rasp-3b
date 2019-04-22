@@ -6,6 +6,7 @@ package com.example.app1;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -43,20 +44,6 @@ public class Client extends Thread {
             socket.setSoTimeout(2000);
             udpSocket = new DatagramSocket();
 
-            //UDP Hole-punching
-            byte[] handshakeBuf = new byte[256];
-            DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
-            for (int i=0; i<10; i++){
-                System.out.println("Sending handshake....");
-                udpSocket.send(handshakePacket);
-            }
-
-            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-            dOut.writeInt(udpSocket.getLocalPort());
-            dOut.flush();
-            dOut.writeUTF(LoginActivity.clickedProductHashID);
-            dOut.flush();
-
             while(true) {
                 int m;
                 try {
@@ -73,6 +60,37 @@ public class Client extends Thread {
             }
             socket.setSoTimeout(0);
 
+            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+            DataInputStream dIn = new DataInputStream(socket.getInputStream());
+
+            int serverPort = dIn.readInt();
+
+            //Server handshake
+            byte[] handshakeBuf = new byte[2];
+            DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), serverPort);
+            for (int i=0; i<10; i++){
+                System.out.println("Sending handshake....");
+                udpSocket.send(handshakePacket);
+            }
+
+            dOut.writeUTF(socket.getLocalAddress().getHostAddress());
+            dOut.flush();
+            dOut.writeInt(udpSocket.getLocalPort());
+            dOut.flush();
+
+            String sysIP = dIn.readUTF();
+            int sysUDPPort = dIn.readInt();
+            System.out.println("sysIP: " + sysIP);
+            System.out.println("sysUDPPort: " + sysUDPPort);
+            //UDP Hole-punching to system
+            byte[] holeBuf = new byte[2];
+            DatagramPacket holePacket = new DatagramPacket(holeBuf, holeBuf.length, InetAddress.getByName(sysIP), sysUDPPort);
+            for (int i=0; i<10; i++){
+                System.out.println("Sending handshake....");
+                udpSocket.send(holePacket);
+            }
+
+
             while (livefeed) {
 
                 byte[] buf = new byte[64000];
@@ -81,6 +99,7 @@ public class Client extends Thread {
                 try {
                     udpSocket.setSoTimeout(5000);
                     udpSocket.receive(imgPacket);
+                    if (imgPacket.getData().length < 3) continue;  // Just in case its the remaining handshake packets from server/system (we're sending 10 at a time)
                 }catch(SocketTimeoutException e){
                     e.printStackTrace();
                     continue;
@@ -95,6 +114,7 @@ public class Client extends Thread {
             }
             livefeed = true;
             socket.close();
+            udpSocket.close();
             System.out.println("CLIENT BANDA JHALA");
 
         } catch (IOException e) {
