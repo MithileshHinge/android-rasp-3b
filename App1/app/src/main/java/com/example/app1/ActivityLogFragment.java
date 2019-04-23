@@ -71,7 +71,6 @@ public class ActivityLogFragment extends Fragment {
         ActivityLogCustomAdapter logCustomAdapter = new ActivityLogCustomAdapter(getContext(), listDataHeaders, listDataChild);
         logCustomAdapter.expandableListView = expandableListView;
         expandableListView.setAdapter(logCustomAdapter);
-
         return v;
     }
 

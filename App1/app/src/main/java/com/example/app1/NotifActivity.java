@@ -62,7 +62,7 @@ public class NotifActivity extends AppCompatActivity {
         System.out.println("........................servername  " + RegistrationActivity.serverName);
 
         Intent intent = getIntent();
-        String imageName = intent.getStringExtra("image_name");
+        //String imageName = intent.getStringExtra("image_name");
         jIV = (ImageView) findViewById(R.id.xIV);
         jVV = (VideoView) findViewById(R.id.xVV);
         //jIVFrame = (ImageView) findViewById(R.id.xIVFrame);
@@ -75,12 +75,12 @@ public class NotifActivity extends AppCompatActivity {
 
         if (videoNotifID != -1) {
             jIV.setImageResource(R.drawable.ic_file_download_24dp);
-        }else if (imageName != null) {
+        }/*else if (imageName != null) {
             Bitmap frame = getImageBitmap(imageName);
             System.out.println("NOTIF FRAME DISPLAYED :" + imageName);
             jIV.setImageBitmap(frame);
 
-        }
+        }*/
 
         if(videoNotifID != -1) {
             jIV.setOnClickListener(new View.OnClickListener() {
@@ -109,10 +109,10 @@ public class NotifActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
                                             if (i == 5) {
-                                                Toast.makeText(context, "System not Registered", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(context, "Error downloading video", Toast.LENGTH_LONG).show();
                                                 System.out.println("............System not registered.............");
                                             } else if (i == 1) {
-                                                Toast.makeText(context, "System already Registered", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(context, "Downloading video", Toast.LENGTH_SHORT).show();
                                                 System.out.println("............System already registered.............");
                                             }
                                         }
@@ -193,7 +193,7 @@ public class NotifActivity extends AppCompatActivity {
                                 outVdo.write(1);
                                 outVdo.flush();
 
-                                final File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
+                                final File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisVideos");
                                 SharedPreferences spref_folder = getSharedPreferences(hashID,MODE_PRIVATE);
                                 String folderName = spref_folder.getString("name","Default");
                                 System.out.println(".....product folder name = " + folderName);

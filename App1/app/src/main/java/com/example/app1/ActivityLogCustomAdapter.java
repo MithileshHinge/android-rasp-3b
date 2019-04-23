@@ -7,7 +7,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -25,6 +29,9 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +106,6 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         TextView jTVHeader = (TextView) convertView.findViewById(R.id.xGroupHeader);
         jTVHeader.setTypeface(null, Typeface.BOLD);
         jTVHeader.setText(headerTitle);
-        //System.out.println("HEADER TITLE : " + headerTitle);
         return convertView;
     }
 
@@ -118,13 +124,26 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
 
         TextView jTVTime = (TextView) convertView.findViewById(R.id.xLogTime);
         String dateTime = childDataItem.getDateTime();
-        //System.out.println("LOG CUSTOM ADAPTER STRING DATE TIME :" + dateTime + " " + dateTime.length());
         jTVTime.setText(dateTime.substring(12,14) + ":" + dateTime.substring(15,17) + ":" + dateTime.substring(18,20) + " " + dateTime.substring(21,23));
 
         ImageView jIVThumb = (ImageView) convertView.findViewById(R.id.xIVLogImg);
         Bitmap getImg = getImageBitmap(_context, childDataItem.getThumbpath());
-        Bitmap thumbnailImg = ThumbnailUtils.extractThumbnail(getImg, 60, 60);
-        jIVThumb.setImageBitmap(thumbnailImg);
+        /*BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        Bitmap getImg = BitmapFactory.decodeFile(childDataItem.getThumbpath(), options);*/
+        System.out.println("ALCA THUMBPATH: " + childDataItem.getThumbpath());
+        if(getImg == null) {
+            jIVThumb.setImageBitmap(null);
+            //jIVThumb.setVisibility(View.INVISIBLE);
+            System.out.println(" image not available ");
+        }
+        else {
+            jIVThumb.setImageBitmap(getImg);
+            System.out.println("ACTIVITY FRAME SET");
+        }
+        /*Bitmap thumbnailImg = ThumbnailUtils.extractThumbnail(getImg, 60, 60);
+        jIVThumb.setImageBitmap(thumbnailImg);*/
+
         /*getImg.recycle();
         getImg = null;
         thumbnailImg.recycle();
@@ -171,6 +190,7 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
             }
         });
 
+
         // Highlight the selected child rows
         if(childDataItem.getStatus()){
             convertView.setBackgroundColor(Color.GRAY);
@@ -184,12 +204,11 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         return true;
     }
 
-
-    public Bitmap getImageBitmap(Context context, String name){
+    /*public Bitmap getImageBitmap(Context context, String name){
         name=name+".jpg";
         try{
 
-            FileInputStream fis = new FileInputStream(new File(new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures"), name));
+            FileInputStream fis = new FileInputStream(new File(new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures"), name));
             Bitmap b = BitmapFactory.decodeStream(fis);
             if(b!=null)
                 System.out.println("....frame attached!....");
@@ -199,7 +218,21 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         catch(Exception e){
         }
         return null;
+    }*/
+
+    //internal storage
+    public Bitmap getImageBitmap(Context context, String name){
+        try{
+            FileInputStream fis = context.openFileInput(name);
+            Bitmap b = BitmapFactory.decodeStream(fis);
+            fis.close();
+            return b;
+        }catch (Exception e){
+
+        }
+        return null;
     }
+
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
@@ -247,6 +280,7 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
             deleteItems.clear();
             System.out.println("..................on destroy madhe ghusla.....................");
             MainActivity.toolbar.setVisibility(View.VISIBLE);
+
             ActivityLogCustomAdapter logCustomAdapter = new ActivityLogCustomAdapter(_context,_listDataHeader, _listDataChild);
             //logCustomAdapter.expandableListView = expandableListView;
             expandableListView.setAdapter(logCustomAdapter);
@@ -314,4 +348,5 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         return myQuittingDialogBox;
 
     }
+
 }

@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     public static String serverName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         serverName = RegistrationActivity.serverName;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -79,19 +80,19 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("write permission status is: " + write_permission);
         if(write_permission) {
             //Creating Magic Eye Directory in Internal Storage
-            final File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MagicEye");
+            final File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Arvis");
             if (!mediaStorageDir.exists()) {
                 if (!mediaStorageDir.mkdirs()) {
                     Log.d("App", "failed to create media directory");
                 }
             }
-            final File videoStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
+            final File videoStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisVideos");
             if (!videoStorageDir.exists()) {
                 if (!videoStorageDir.mkdirs()) {
                     Log.d("App", "failed to create video directory");
                 }
             }
-            final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+            final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures");
             if (!imageStorageDir.exists()) {
                 if (!imageStorageDir.mkdirs()) {
                     Log.d("App", "failed to create picture directory");
@@ -122,24 +123,24 @@ public class MainActivity extends AppCompatActivity {
 
                     //Replacing the main content with LivefeedFragment Which is our Inbox View;
                     case R.id.livefeed:
-                        Toast.makeText(getApplicationContext(), "Starting Live Feed", Toast.LENGTH_SHORT).show();
-                        LivefeedFragment fragment = new LivefeedFragment();
+                        //Toast.makeText(getApplicationContext(), "Starting Live Feed", Toast.LENGTH_SHORT).show();
+                        LivefeedFragment livefeedFragment = new LivefeedFragment();
                         android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction.replace(R.id.frame, fragment);
+                        fragmentTransaction.replace(R.id.frame, livefeedFragment);
                         fragmentTransaction.commit();
                         return true;
 
                     // For rest of the options we just show a toast on click
 
                     case R.id.recordings:
-                        Toast.makeText(getApplicationContext(), "Videos", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Recordings", Toast.LENGTH_SHORT).show();
                         RecordingFragment recording = new RecordingFragment();
                         android.support.v4.app.FragmentTransaction recordingTransaction = getSupportFragmentManager().beginTransaction();
                         recordingTransaction.replace(R.id.frame, recording);
                         recordingTransaction.commit();
                         return true;
                     case R.id.images:
-                        Toast.makeText(getApplicationContext(), "Pictures", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Images", Toast.LENGTH_SHORT).show();
                         ImageFragment images = new ImageFragment();
                         android.support.v4.app.FragmentTransaction imgTransaction = getSupportFragmentManager().beginTransaction();
                         imgTransaction.replace(R.id.frame, images);
@@ -316,19 +317,19 @@ public class MainActivity extends AppCompatActivity {
             //resume tasks needing this permission
             System.out.println("waiting to create folders");
             //Creating Magic Eye Directory in Internal Storage
-            final File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MagicEye");
+            final File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Arvis");
             if (!mediaStorageDir.exists()) {
                 if (!mediaStorageDir.mkdirs()) {
                     Log.d("App", "failed to create media directory");
                 }
             }
-            final File videoStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
+            final File videoStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisVideos");
             if (!videoStorageDir.exists()) {
                 if (!videoStorageDir.mkdirs()) {
                     Log.d("App", "failed to create video directory");
                 }
             }
-            final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
+            final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures");
             if (!imageStorageDir.exists()) {
                 if (!imageStorageDir.mkdirs()) {
                     Log.d("App", "failed to create picture directory");
