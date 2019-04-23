@@ -9,7 +9,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/activity_to_do"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:paddingTop="56dp"
         android:paddingLeft="24dp"
         android:paddingRight="24dp">
@@ -34,7 +34,6 @@
             android:id="@+id/addProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
             android:layout_gravity="bottom|right"
             android:src="@drawable/ic_plus" />
     </FrameLayout>

@@ -20,17 +20,18 @@ public class RecordingFragment extends Fragment {
     @Nullable
     private Context context;
     public static List<BookmarkedDatabaseRow> data= new ArrayList<>();
-    public static File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyeVideos");
+    public static File vdoDirectory = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisVideos");
     public static File specificVdoDir;
     String hashID;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.image_fragment, container, false);
-        getActivity().setTitle("Videos");
+        getActivity().setTitle("Recordings");
         context = getContext();
         data=new ArrayList<>();
         hashID = LoginActivity.clickedProductHashID;
         specificVdoDir = new File(vdoDirectory.getPath(),RegistrationActivity.clickedItem);
+        System.out.println("Video directory : " + specificVdoDir.getAbsolutePath().toString());
 
         try {
             for (File fileEntry : specificVdoDir.listFiles()) {

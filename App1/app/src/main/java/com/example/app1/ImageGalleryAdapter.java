@@ -253,6 +253,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
         public void onClick(View view) {
             if(mActionMode == null) {
                 Intent galleryIntent = new Intent(Intent.ACTION_VIEW);
+                galleryIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 try {
                     int itemPosition;
                     String imgUrl;
@@ -274,7 +275,8 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                         case 2:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);
                             imgUrl = RecordingFragment.data.get(itemPosition).getUrl();
-                            imgURI = FileProvider.getUriForFile(context,RecordingFragment.specificVdoDir.getAbsolutePath().toString(),new File(imgUrl));
+                            System.out.println("imgUrl : " + imgUrl);
+                            imgURI = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName() + ".provider",new File(imgUrl));
                             System.out.println("ONCLICK" + imgUrl);
                             /*galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video*//*");*/
                             galleryIntent.setDataAndType(imgURI, "video/*");
@@ -283,17 +285,22 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapte
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);  //change
                             imgUrl = bkmrkImages.get(itemPosition).getUrl();
                             Log.d("ONCLICK", imgUrl);
-                            galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "image/*");
+                            imgURI = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName() + ".provider",new File(imgUrl));
+                            //galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "image/*");
+                            galleryIntent.setDataAndType(imgURI, "image/*");
                             break;
                         case 4:
                             itemPosition = imageRecyclerView.getChildLayoutPosition(view);  //change
                             imgUrl = bkmrkVideos.get(itemPosition).getUrl();
                             System.out.println("ONCLICK" + imgUrl);
-                            galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video/*");
+                            imgURI = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName() + ".provider",new File(imgUrl));
+                            //galleryIntent.setDataAndType(Uri.fromFile(new File(imgUrl)), "video/*");
+                            galleryIntent.setDataAndType(imgURI, "video/*");
                             break;
 
                     }
                 } catch (NullPointerException n) {
+                    n.printStackTrace();
                     Toast.makeText(context, "Cannot Open File!", Toast.LENGTH_SHORT).show();
                 }
                 galleryIntent.setAction(Intent.ACTION_VIEW);

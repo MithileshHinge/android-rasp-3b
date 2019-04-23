@@ -25,10 +25,12 @@
 
     <VideoView
         android:id="@+id/xVV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="fitCenter"
+        android:layout_marginLeft="19dp"
         android:layout_marginTop="19dp"
+        android:paddingRight="19dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/toolbar"
         android:visibility="gone"/>

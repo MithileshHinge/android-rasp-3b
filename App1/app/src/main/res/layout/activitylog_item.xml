@@ -12,7 +12,6 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:src="@color/colorPrimary"
         android:padding="10dp"
         />
     <TextView

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -180,13 +182,20 @@ public class LoginActivity extends AppCompatActivity {
         System.out.println(".....validation done");
 
         while (validate1Done == 3) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
         if (validate1Done == 2) {
             progressDialog.dismiss();
             //startActivity(new Intent(LoginActivity.class));
             System.out.println("...validate1Done value = 2");
             return;
         }
+        System.out.println("Validate1Done = " + validate1Done);
         validate1Done = 3;
 
         if(_loggedIn.isChecked())
@@ -256,6 +265,22 @@ public class LoginActivity extends AppCompatActivity {
                             public void run() {
                                 System.out.println("...Connection successfully established...");
                                 Toast.makeText(context,"Connection Successfully Established !",Toast.LENGTH_LONG).show();
+                                //Make respective directories
+                                File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures");
+                                final File specificImageStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+                                if (!specificImageStorageDir.exists()) {
+                                    if (!specificImageStorageDir.mkdirs()) {
+                                        Log.d("App", "failed to create picture directory");
+                                    }
+                                }
+                                File videoStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisVideos");
+                                final File specificVideoStorageDir = new File(videoStorageDir.getPath(),RegistrationActivity.clickedItem);
+                                if (!specificVideoStorageDir.exists()) {
+                                    if (!specificVideoStorageDir.mkdirs()) {
+                                        Log.d("App", "failed to create video directory");
+                                    }
+                                }
+
                                 finish();
                             }
                         });
@@ -421,7 +446,7 @@ public class LoginActivity extends AppCompatActivity {
                         validate1Done = 2;
                         return;
                     }
-                    System.out.println("....thread on its last stage...");
+                    System.out.println("....thread on its last stage... Validate1done = " + validate1Done);
 
                 } catch (IOException e) {
                     e.printStackTrace();

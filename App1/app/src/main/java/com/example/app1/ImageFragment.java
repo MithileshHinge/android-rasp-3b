@@ -24,7 +24,7 @@ public class ImageFragment extends Fragment {
     private Context context;
     public static List<BookmarkedDatabaseRow> data = new ArrayList<>();
     public static List<File> checkEntry = new ArrayList<>();
-    public static File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures"), specificImgStorageDir;
+    public static File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures"),specificImgStorageDir;
     String hashID;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,17 +32,16 @@ public class ImageFragment extends Fragment {
         data = new ArrayList<>();
         specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
         hashID = LoginActivity.clickedProductHashID;
-        getActivity().setTitle("Pictures");
+        getActivity().setTitle("Images");
         context = getContext();
         try {
             for (File fileEntry : specificImgStorageDir.listFiles()) {
                 System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                 System.out.println(fileEntry);
-                System.out.println(fileEntry.getPath());
-                if(checkEntry.contains(fileEntry)) {
+                /*if(checkEntry.contains(fileEntry)) {
                     System.out.println("continued");
                     continue;
-                }
+                }*/
 
                 String extension = (fileEntry.getName()).split("\\.")[1];
                 checkEntry.add(fileEntry);
@@ -92,7 +91,7 @@ public class ImageFragment extends Fragment {
         adapter.classSelector = 1;
         adapter.imageRecyclerView = recyclerView;
         recyclerView.setAdapter(adapter);
-        System.out.println("............................!!!!!!!!!!!!!!!!!!!!!!!!!........................");
+        System.out.println("............................images = "+data.size());
 
         return v;
     }

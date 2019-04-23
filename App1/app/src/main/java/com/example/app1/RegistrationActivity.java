@@ -45,6 +45,8 @@ public class RegistrationActivity extends AppCompatActivity {
         productView.setLayoutManager(linearLayoutManager);
         productView.setHasFixedSize(true);
         System.out.println("........Reg activity started........");
+        SharedPreferences spref = getSharedPreferences("fcmToken" , MODE_PRIVATE);
+        System.out.println("........FCM Token = " + spref.getString("fcmToken", ""));
 
         //TODO: reproduce the stored allProducts
 

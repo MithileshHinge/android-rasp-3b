@@ -65,12 +65,12 @@ public class LivefeedFragment extends Fragment {
     private static String servername;
     private Socket handshake_socket;
     private static SharedPreferences spref_ip;
-    public ProgressDialog progressDialg;
+    private ProgressDialog progressDialg;
 
     private static int msgPort = 7676;
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13, BYTE_GET_SYSIP=15;
 
-    public static ToggleButton Alarm_button;
+    public static ToggleButton Alarm_button, Voice_button;
 
     public static final int REQUEST_MICROPHONE = 1;
 
@@ -81,7 +81,7 @@ public class LivefeedFragment extends Fragment {
         getActivity().setTitle("Live Feed");
         img = (ImageView) v.findViewById(R.id.imageView);
         Button photo_button = (Button)  v.findViewById(R.id.push_button);
-        ToggleButton Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
+        Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
         Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
@@ -89,7 +89,7 @@ public class LivefeedFragment extends Fragment {
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
 
-        progressDialg = new ProgressDialog(v.getContext(), R.style.AppTheme);
+        progressDialg = new ProgressDialog(getContext());
         System.out.println("                 Progress Dialog initiated!!!!!!!!!!!!");
         progressDialg.setIndeterminate(true);
         progressDialg.setMessage("Establishing connection...");
@@ -127,8 +127,7 @@ public class LivefeedFragment extends Fragment {
         photo_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "photo clicked", Toast.LENGTH_SHORT).show();
-                final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
-
+                final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("Arvis"), "ArvisPictures");
                 final File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
                 if (!specificImgStorageDir.exists()) {
                     if (!specificImgStorageDir.mkdirs()) {
@@ -138,7 +137,7 @@ public class LivefeedFragment extends Fragment {
 
                 SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss");
                 Date date = new Date();
-                final String finalImageFileName = specificImgStorageDir.getPath() + "/" + date + ".jpg";
+                final String finalImageFileName = specificImgStorageDir.getPath() + "/" + ft.format(date) + ".jpg";
                 if(frame != null) {
                     try {
                         FileOutputStream fos = new FileOutputStream(finalImageFileName);
@@ -424,8 +423,41 @@ public class LivefeedFragment extends Fragment {
                 }
             }
         }
+        Voice_button.setChecked(false);
         super.onPause();
     }
+
+    /*@Override
+    public void onResume() {
+        t = new Client();
+        t.start();
+        final Handler handler = new Handler();
+
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (frameChanged) {
+                        if(progressDialg.isShowing()){
+                            System.out.println("                     Progress dialog running");
+                            progressDialg.dismiss();
+                        }
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                img.setImageBitmap(frame);
+                            }
+                        });
+                        frameChanged = false;
+                    }
+                }
+            }
+        });
+        t2.start();
+        super.onResume();
+    }*/
 
     public static boolean sendMsg(int p){
         Socket msgSocket;

@@ -16,9 +16,7 @@ public class DatabaseRow {
 
 
     // Empty constructor
-    public DatabaseRow(){
-
-    }
+    public DatabaseRow(){    }
     // constructor
     public DatabaseRow(int id, String name, String date, int isBookmarked, String thumbpath, String hashID){
         this._id = id;
