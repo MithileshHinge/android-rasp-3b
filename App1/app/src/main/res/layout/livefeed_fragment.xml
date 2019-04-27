@@ -56,4 +56,19 @@
         android:layout_marginLeft="30dp"
         android:layout_alignTop="@+id/push_button" />
 
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:button="@drawable/speaker_button"
+        android:background="@null"
+        android:textOff=""
+        android:textOn=""
+        android:checked="false"
+        android:id="@+id/Speaker_button"
+        android:layout_above="@+id/Voice_button"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="30dp" />
+
+
 </RelativeLayout>
