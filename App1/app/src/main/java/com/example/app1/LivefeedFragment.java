@@ -61,7 +61,7 @@ public class LivefeedFragment extends Fragment {
     private int AudioPort = 7671, AudioTcpPort = 7670;
 
     static AudioRecord recorder;
-    private int sampleRate = 44100;
+    private int sampleRate = 16000;
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize;
@@ -136,7 +136,7 @@ public class LivefeedFragment extends Fragment {
                 Toast.makeText(v.getContext(), "photo clicked", Toast.LENGTH_SHORT).show();
                 final File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory("MagicEye"), "MagicEyePictures");
 
-                final File specificImgStorageDir = new File(imageStorageDir.getPath(),RegistrationActivity.clickedItem);
+                final File specificImgStorageDir = new File(imageStorageDir.getPath(), RegistrationActivity.clickedItem);
                 if (!specificImgStorageDir.exists()) {
                     if (!specificImgStorageDir.mkdirs()) {
                         Log.d("App", "failed to create video directory");
@@ -146,7 +146,7 @@ public class LivefeedFragment extends Fragment {
                 SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss");
                 Date date = new Date();
                 final String finalImageFileName = specificImgStorageDir.getPath() + "/" + date + ".jpg";
-                if(frame != null) {
+                if (frame != null) {
                     try {
                         FileOutputStream fos = new FileOutputStream(finalImageFileName);
                         frame.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -391,6 +391,11 @@ public class LivefeedFragment extends Fragment {
 
                         AudioSocket.send(packet);
                         System.out.println("SENDING DATA");
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 } catch(UnknownHostException e) {

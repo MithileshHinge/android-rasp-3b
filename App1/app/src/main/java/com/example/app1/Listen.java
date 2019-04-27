@@ -21,7 +21,7 @@ public class Listen extends Thread {
     public static DatagramSocket listenSocket;
     private Socket handshake_socket;
     private int Listen_UDP_Port = 7673 , Listen_TCP_Port = 7675;
-    private int sampleRate = 16000;
+    private int sampleRate = 8000;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize;
     private String serverName;
@@ -59,7 +59,7 @@ public class Listen extends Thread {
                 return;
             }
 
-            minBufSize = 4096;
+            minBufSize = 8184;
             buffer = new byte[minBufSize];
 
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
