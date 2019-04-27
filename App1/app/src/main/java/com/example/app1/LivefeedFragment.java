@@ -173,13 +173,15 @@ public class LivefeedFragment extends Fragment {
                                 System.out.println(".............voice button clicked...!!!");
                                 while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)) {
                                 }
-                                handshake_socket = new Socket(servername, AudioTcpPort);
+                                handshake_socket = new Socket(RegistrationActivity.ipv6, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
                                 OutputStream out = handshake_socket.getOutputStream();
-                                out.write(1);
-                                out.flush();
-                                System.out.println("P=1 PATHAVLA");
                                 InputStream in = handshake_socket.getInputStream();
+                                DataInputStream din = new DataInputStream(in);
+                                DataOutputStream dout = new DataOutputStream(out);
+
+                                dout.writeUTF(LoginActivity.clickedProductHashID);
+
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);
                                 //handshake_socket.close();
@@ -188,28 +190,11 @@ public class LivefeedFragment extends Fragment {
                                 if (p == 2) {
                                     p = 0;
 
-                                    DataInputStream din = new DataInputStream(in);
-                                    DataOutputStream dout = new DataOutputStream(out);
-
-                                    int serverUdpPort = din.readInt();
-
-                                    DatagramSocket serverUdpSock = new DatagramSocket();
-
-                                    byte[] serverHandshakeBuf = new byte[2];
-                                    DatagramPacket serverPacket = new DatagramPacket(serverHandshakeBuf, serverHandshakeBuf.length, handshake_socket.getInetAddress(), serverUdpPort);
-                                    for (int i=0; i<10; i++) {
-                                        serverUdpSock.send(serverPacket);
-                                    }
-
-                                    dout.writeUTF(handshake_socket.getLocalAddress().getHostAddress());
-                                    dout.writeInt(serverUdpSock.getLocalPort());
-
-                                    String sysIP = din.readUTF();
                                     int sysUdpPort = din.readInt();
+                                    String sysIP = din.readUTF();
 
                                     startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
 
-                                    startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
                                     System.out.println("......STREAMING START JHALI.....");
                                 }
 
@@ -280,44 +265,31 @@ public class LivefeedFragment extends Fragment {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            try{
+                            try {
                                 System.out.println(".............voice button clicked...!!!");
-                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
-                                handshake_socket = new Socket(servername, AudioTcpPort);
+                                while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)) {
+                                }
+                                handshake_socket = new Socket(RegistrationActivity.ipv6, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
                                 OutputStream out = handshake_socket.getOutputStream();
-                                out.write(1);
-                                out.flush();
-                                System.out.println("P=1 PATHAVLA");
                                 InputStream in = handshake_socket.getInputStream();
+                                DataInputStream din = new DataInputStream(in);
+                                DataOutputStream dout = new DataOutputStream(out);
+                                dout.writeUTF(LoginActivity.clickedProductHashID);
+
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);
                                 //handshake_socket.close();
                                 //System.out.println(".........HANDSHAKE SOCKET BANDA.....");
 
-                                if (p == 2){
-                                    p=0;
+                                if (p == 2) {
+                                    p = 0;
 
-                                    DataInputStream din = new DataInputStream(in);
-                                    DataOutputStream dout = new DataOutputStream(out);
-
-                                    int serverUdpPort = din.readInt();
-
-                                    DatagramSocket serverUdpSock = new DatagramSocket();
-
-                                    byte[] serverHandshakeBuf = new byte[2];
-                                    DatagramPacket serverPacket = new DatagramPacket(serverHandshakeBuf, serverHandshakeBuf.length, handshake_socket.getInetAddress(), serverUdpPort);
-                                    for (int i=0; i<10; i++) {
-                                        serverUdpSock.send(serverPacket);
-                                    }
-
-                                    dout.writeUTF(handshake_socket.getLocalAddress().getHostAddress());
-                                    dout.writeInt(serverUdpSock.getLocalPort());
-
-                                    String sysIP = din.readUTF();
                                     int sysUdpPort = din.readInt();
+                                    String sysIP = din.readUTF();
 
                                     startStreaming(InetAddress.getByName(sysIP), sysUdpPort);
+
                                     System.out.println("......STREAMING START JHALI.....");
                                 }
 
@@ -326,7 +298,6 @@ public class LivefeedFragment extends Fragment {
                             }
                         }
                     }).start();
-
                 }
         }
     }
