@@ -37,12 +37,20 @@ public class Client extends Thread {
             /*spref_ip = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
             serverName = spref_ip.getString("ip_address","");
 */
-            serverName = RegistrationActivity.serverName;
+            serverName = RegistrationActivity.ipv6;
             while(!LivefeedFragment.sendMsg(LivefeedFragment.BYTE_START_LIVEFEED)){}
 
             socket = new Socket(serverName, port);
             socket.setSoTimeout(2000);
             udpSocket = new DatagramSocket();
+
+            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+            DataInputStream dIn = new DataInputStream(socket.getInputStream());
+
+            dOut.writeUTF(LoginActivity.clickedProductHashID);
+            dOut.writeInt(udpSocket.getLocalPort());
+            dOut.flush();
+            System.out.println("mobPort written");
 
             while(true) {
                 int m;
@@ -53,42 +61,12 @@ public class Client extends Thread {
                     continue;
                 }
                 if (m != 1) {
-                    System.out.println("System mobile not mapped............mob received = " + m);
+                    System.out.println("System is offline............mob received = " + m);
                     return;
                 }else
                     break;
             }
             socket.setSoTimeout(0);
-
-            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-            DataInputStream dIn = new DataInputStream(socket.getInputStream());
-
-            int serverPort = dIn.readInt();
-
-            //Server handshake
-            byte[] handshakeBuf = new byte[2];
-            DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), serverPort);
-            for (int i=0; i<10; i++){
-                System.out.println("Sending handshake....");
-                udpSocket.send(handshakePacket);
-            }
-
-            dOut.writeUTF(socket.getLocalAddress().getHostAddress());
-            dOut.flush();
-            dOut.writeInt(udpSocket.getLocalPort());
-            dOut.flush();
-
-            String sysIP = dIn.readUTF();
-            int sysUDPPort = dIn.readInt();
-            System.out.println("sysIP: " + sysIP);
-            System.out.println("sysUDPPort: " + sysUDPPort);
-            //UDP Hole-punching to system
-            byte[] holeBuf = new byte[2];
-            DatagramPacket holePacket = new DatagramPacket(holeBuf, holeBuf.length, InetAddress.getByName(sysIP), sysUDPPort);
-            for (int i=0; i<10; i++){
-                System.out.println("Sending handshake....");
-                udpSocket.send(holePacket);
-            }
 
 
             while (livefeed) {

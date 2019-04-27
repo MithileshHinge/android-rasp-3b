@@ -23,7 +23,8 @@ import java.util.Set;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    public static String serverName = "13.233.111.181";
+    public static String serverName = "52.66.210.57";
+    public static String ipv6 = "2406:da1a:58f:da12:2251:bc86:f6b7:227e";
     public static RecyclerView productView;
     public static List<Product> allProducts = new ArrayList<>();
     public static String clickedItem;
