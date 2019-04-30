@@ -7,6 +7,7 @@ import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.SeekBarPreference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.widget.Toast;
 
@@ -57,8 +58,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             p2.setSummary(listPref.getEntry());
             edit.putString("modeType",listPref.getEntry().toString());
             edit.apply();
-            System.out.println("...........listPref.getEntry() = "+listPref.getEntry());
-            System.out.println("...........listPref.getEntry().toString() = "+listPref.getEntry().toString());
+            /*System.out.println("...........listPref.getEntry() = "+listPref.getEntry());
+            System.out.println("...........listPref.getEntry().toString() = "+listPref.getEntry().toString());*/
         }
 
         Preference p3 = getPreferenceScreen().findPreference("keyy1");
@@ -98,6 +99,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         if(p7 instanceof SwitchPreferenceCompat){
             ((SwitchPreferenceCompat) p7).setChecked(emailNotif);
         }
+
+        Preference p1 = getPreferenceScreen().findPreference("key3");
+        int volume = spref.getInt("volume",5);
+        /*if(p1 instanceof SeekBarPreference){
+            ((SeekBarPreference) p8).setValue(volume);
+        }*/
+
 
         /*Preference p2 = getPreferenceScreen().findPreference("key4");
         SharedPreferences spref_mode = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -282,6 +290,21 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
             }
 
+        }
+
+        if(key.equals("key3")){
+            Preference p1 = getPreferenceScreen().findPreference("key3");
+            if(p1 instanceof SeekBarPreference){
+
+                SharedPreferences spref_volume = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = spref_volume.edit();
+
+                SeekBarPreference seekBarPreference = (SeekBarPreference)p1;
+                int volume = seekBarPreference.getValue();
+                System.out.println("VOLUME :" + volume);
+                editor.putInt("volume",volume);
+                editor.apply();
+            }
         }
     }
 }

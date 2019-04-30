@@ -10,6 +10,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
@@ -33,9 +34,11 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.ListIterator;
 
 
 /**
@@ -131,15 +134,15 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
         /*BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
         Bitmap getImg = BitmapFactory.decodeFile(childDataItem.getThumbpath(), options);*/
-        System.out.println("ALCA THUMBPATH: " + childDataItem.getThumbpath());
+        //System.out.println("ALCA THUMBPATH: " + childDataItem.getThumbpath());
         if(getImg == null) {
             jIVThumb.setImageBitmap(null);
             //jIVThumb.setVisibility(View.INVISIBLE);
-            System.out.println(" image not available ");
+            //System.out.println(" image not available ");
         }
         else {
             jIVThumb.setImageBitmap(getImg);
-            System.out.println("ACTIVITY FRAME SET");
+            //System.out.println("ACTIVITY FRAME SET");
         }
         /*Bitmap thumbnailImg = ThumbnailUtils.extractThumbnail(getImg, 60, 60);
         jIVThumb.setImageBitmap(thumbnailImg);*/
@@ -281,9 +284,15 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
             System.out.println("..................on destroy madhe ghusla.....................");
             MainActivity.toolbar.setVisibility(View.VISIBLE);
 
-            ActivityLogCustomAdapter logCustomAdapter = new ActivityLogCustomAdapter(_context,_listDataHeader, _listDataChild);
-            //logCustomAdapter.expandableListView = expandableListView;
-            expandableListView.setAdapter(logCustomAdapter);
+            //System.out.println("NOTIFYY DATA SET CHANGED");
+            /*ActivityLogCustomAdapter logCustomAdapter = new ActivityLogCustomAdapter(_context,_listDataHeader, _listDataChild);
+            logCustomAdapter.expandableListView = expandableListView;
+            if(expandableListView == null)
+                System.out.println("..........");
+            else if(logCustomAdapter == null)
+                System.out.println("..........*************");
+            else
+                expandableListView.setAdapter(logCustomAdapter);*/
         }
     };
 
@@ -296,6 +305,7 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
             if(deleteItems.contains(data.get(childPosition))){
                 deleteItems.remove(data.get(childPosition));
                 data.get(childPosition).setStatus(false);
+
             }else{
                 deleteItems.add(data.get(childPosition));
                 data.get(childPosition).setStatus(true);
@@ -327,6 +337,18 @@ public class ActivityLogCustomAdapter extends BaseExpandableListAdapter{
                         System.out.println(deleteItems.size()+" items present");
                         for(position=0; position<deleteItems.size(); position++) {
                             DatabaseRow row = deleteItems.get(position);
+                            String datetime = row.getDateTime();
+                            String[] months = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+                            String date = datetime.substring(8, 10) + " " + months[Integer.parseInt(datetime.substring(5, 7)) - 1];
+                            //System.out.println("Before deleting..." + _listDataChild.get(date).size());
+                            //_listDataChild.get(date).remove(row.getID());
+                            int index = _listDataChild.get(date).indexOf(row);
+                            System.out.println("deleting..." + _listDataChild.get(date).size() + "INDEX: " + index + " NAME: " + _listDataChild.get(date).get(index).getThumbpath());
+                            _listDataChild.get(date).remove(index);
+                            String thumbpath = row.getThumbpath();
+                            if(thumbpath!= null)
+                                _context.deleteFile(thumbpath);
+                            System.out.println("DELETING FILE : " + thumbpath);
                             NotifyService.db.deleteRow(row.getID());
                             System.out.println("...........file deleted...........");
                         }

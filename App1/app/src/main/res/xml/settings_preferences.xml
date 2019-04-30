@@ -26,6 +26,15 @@
             android:summary="Control Email Service"
             android:defaultValue="false" />
 
+        <android.support.v7.preference.SeekBarPreference
+            android:key="key3"
+            android:title="Volume"
+            android:max="5"
+            android:defaultValue="5"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            />
+
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory

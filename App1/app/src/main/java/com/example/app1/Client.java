@@ -37,14 +37,22 @@ public class Client extends Thread {
             serverName = spref_ip.getString("ip_address","");
 */
             serverName = RegistrationActivity.serverName;
+            while (!LivefeedFragment.sendMsg(LivefeedFragment.volume)){}
             while(!LivefeedFragment.sendMsg(LivefeedFragment.BYTE_START_LIVEFEED)){}
-
+            System.out.println("LIVEFEED TCP HANDSHAKE DONE");
             socket = new Socket(serverName, port);
             socket.setSoTimeout(2000);
             udpSocket = new DatagramSocket();
 
             //UDP Hole-punching
-            byte[] handshakeBuf = new byte[256];
+            byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
+            System.out.println("Client hash id : " + new String(handshakeBuf));
+
+            /*byte[] a = new byte[256];
+            byte[] handshakeBuf = new byte[hashID.length + a.length];
+            System.arraycopy(hashID,0,handshakeBuf,0,hashID.length);
+            System.arraycopy(a,0,handshakeBuf,hashID.length,a.length);*/
+
             DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
             for (int i=0; i<10; i++){
                 System.out.println("Sending handshake....");
@@ -52,8 +60,8 @@ public class Client extends Thread {
             }
 
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-            dOut.writeInt(udpSocket.getLocalPort());
-            dOut.flush();
+            /*dOut.writeInt(udpSocket.getLocalPort());
+            dOut.flush();*/
             dOut.writeUTF(LoginActivity.clickedProductHashID);
             dOut.flush();
 
@@ -81,6 +89,7 @@ public class Client extends Thread {
                 try {
                     udpSocket.setSoTimeout(5000);
                     udpSocket.receive(imgPacket);
+                    System.out.println(imgPacket.getAddress());
                 }catch(SocketTimeoutException e){
                     e.printStackTrace();
                     continue;

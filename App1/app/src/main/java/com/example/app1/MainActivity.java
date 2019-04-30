@@ -99,8 +99,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+
         //Initializing NavigationView
         navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        Menu menu = navigationView.getMenu();
+        MenuItem item = menu.findItem(R.id.livefeed);
+        item.setEnabled(LoginActivity.livefeedDrawer);
 
         //Setting Navigation View Item Selected Listener to handle the item click of the navigation menu
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -108,8 +113,6 @@ public class MainActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-
-
                 //Checking if the item is in checked state or not, if not make it in checked state
                 if (menuItem.isChecked()) menuItem.setChecked(false);
                 else menuItem.setChecked(true);
@@ -198,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 String s = sharedPreferences.getString("modeType","");
                 mode.setText(s);
                 username = (TextView) findViewById(R.id.username);
-                String s1 = sharedPreferences.getString("username","");
+                String s1 = sharedPreferences.getString("name","");
                 username.setText(s1);
 
                 super.onDrawerOpened(drawerView);

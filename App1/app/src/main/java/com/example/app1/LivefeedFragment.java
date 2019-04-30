@@ -1,6 +1,7 @@
 package com.example.app1;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -58,6 +59,7 @@ public class LivefeedFragment extends Fragment {
 
     static AudioRecord recorder;
     private int sampleRate = 44100;
+    public static int volume;
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize;
@@ -88,6 +90,19 @@ public class LivefeedFragment extends Fragment {
 
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
+
+        SharedPreferences spref_volume = getContext().getSharedPreferences(LoginActivity.clickedProductHashID, Context.MODE_PRIVATE);
+        volume =spref_volume.getInt("volume",5);
+        System.out.println("LIVEFEED VOLUME : " + volume);
+        volume = volume + 20;
+        /*new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!LivefeedFragment.sendMsg(volume)) {}
+            }
+        }).start();*/
+
+
 
         progressDialg = new ProgressDialog(getContext());
         System.out.println("                 Progress Dialog initiated!!!!!!!!!!!!");

@@ -13,7 +13,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.view.menu.MenuView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -38,12 +40,12 @@ public class LoginActivity extends AppCompatActivity {
     public static SharedPreferences spref_user,spref_email;
     private static SharedPreferences loggedIn;
     //public static boolean toBeVerified = false , createFile;    //toBeVerified is set true when user logs out from app
-    public static boolean createFile;
+    public static boolean createFile, livefeedDrawer;
     public static int i;
     public static Socket connServerSocket;
     public static InputStream in;
     public static OutputStream out;
-    private static Boolean fcmTokenSent = false;
+    private static boolean fcmTokenSent = false;
 
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_login) Button _loginButton;
@@ -250,6 +252,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (p == 9) {
                         //Toast.makeText(getBaseContext(), "Connection successfully established !", Toast.LENGTH_LONG).show();
+                        livefeedDrawer = true;
                         System.out.println("Connection successfully established !");
 
                         // TODO: Get the local IP of system
@@ -313,6 +316,7 @@ public class LoginActivity extends AppCompatActivity {
                         });
                     } else {
                         System.out.println("...system offline...");
+                        livefeedDrawer = false;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
