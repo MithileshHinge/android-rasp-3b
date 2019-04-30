@@ -9,12 +9,9 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
-import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Base64;
+
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -23,20 +20,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+
 
 import static android.support.v7.preference.R.id.list;
 
@@ -108,22 +100,16 @@ public class NotifyService extends FirebaseMessagingService {
             e.printStackTrace();
         }
         final Context context = getApplicationContext();
-        String notifTitle = "Something's happening at your door! : "+ corresProduct ;
         final String notifText = "Generating video...";
+        final String notifVdoText = "Tap to watch video.";
 
-        String notifVdoTitle = "Something's happening at your door! Video generated. : "+ corresProduct;
-        String notifVdoText = "Tap to watch video.";
-
-        lightTitle = "Lights have changed : ";
-        final String camTitle = "Camera Inactive alert : ";
-        final String memoryTitle = "Low storage space alert :  ";
         //final String memoryText = "Check out on the memory left on your Magic Eye system";
 
-        final NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notif).setContentTitle(notifTitle).setContentText(notifText).setAutoCancel(true);
-        final NotificationCompat.Builder notifVdoBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_video).setContentTitle(notifVdoTitle).setContentText(notifVdoText).setAutoCancel(true);
-        final NotificationCompat.Builder lightBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(lightTitle).setAutoCancel(true);
-        final NotificationCompat.Builder camBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(camTitle).setAutoCancel(true);
-        final NotificationCompat.Builder memoryBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setContentTitle(memoryTitle).setAutoCancel(true);
+        final NotificationCompat.Builder notifBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notif).setContentText(notifText).setAutoCancel(true);
+        final NotificationCompat.Builder notifVdoBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_video).setContentText(notifVdoText).setAutoCancel(true);
+        final NotificationCompat.Builder lightBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setAutoCancel(true);
+        final NotificationCompat.Builder camBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setAutoCancel(true);
+        final NotificationCompat.Builder memoryBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_light).setAutoCancel(true);
 
         notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         notifVdoBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -186,6 +172,7 @@ public class NotifyService extends FirebaseMessagingService {
 
                     SharedPreferences spref = getSharedPreferences(recvdHashID,MODE_PRIVATE);
                     corresProduct = spref.getString("name",null);
+                    System.out.println("Product name: " + corresProduct);
                     notifStatus = spref.getBoolean("mobNotif",false);
                     serialNo = spref.getInt("serialNo",0);
 
@@ -208,19 +195,28 @@ public class NotifyService extends FirebaseMessagingService {
                     secondNotifIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
                     if(p==BYTE_ALERT1)
-                        notifBuilder.setContentTitle("Alert level1 : "+corresProduct);
+                        notifBuilder.setContentTitle(corresProduct + ": Alert level1.");
+                    if(p==BYTE_FACEFOUND_VDOGENERATING)
+                        notifBuilder.setContentTitle(corresProduct + ": Something's happening at your door!");
                     if(p == BYTE_FACEFOUND_VDOGENERATED)
                     {
-                        notifVdoBuilder.setContentTitle("Face Found.Video generated : "+corresProduct);
-                        _name = "Face Found.Video generated";
+                        _name = "Face Found.";
+                        notifVdoBuilder.setContentTitle(corresProduct + ": Face Found.");
                     }
                     if(p == BYTE_ALERT2)
                     {
-                        _name = "Suspicious activity. Alert level 2";
-                        notifVdoBuilder.setContentTitle("Suspicious activity.Video generated : "+corresProduct);
+                        _name = "Activity occurred.";
+                        notifVdoBuilder.setContentTitle(corresProduct + ": Activity occurred.");
                     }
-                    if( p == BYTE_ABRUPT_END)
+                    if( p == BYTE_ABRUPT_END){
                         _name = "Abrupt end of activity.";
+                        notifVdoBuilder.setContentTitle(corresProduct + ": Abrupt end of activity.");
+                    }
+                    if(p == BYTE_LIGHT){
+                        _name = "Lights have changed.";
+                        lightBuilder.setContentTitle(corresProduct + ": Lights have changed.");
+                    }
+
                     if(p==BYTE_FACEFOUND_VDOGENERATING || p== BYTE_ALERT1) {
                         /*Socket socketFrame = new Socket(servername, PORT_NOTIF_FRAME);
                         System.out.println("............FRAME SOCKET........");
@@ -255,24 +251,17 @@ public class NotifyService extends FirebaseMessagingService {
                         /*DataInputStream dataInputStream = new DataInputStream(in);
                         String _date = dataInputStream.readUTF();*/
                         _date = json.getString("date");
+
                         String frameString = json.getString("Frame");
-                        if(frameString == null)
-                            System.out.println("............frame received is null");
-                        //final Bitmap notifFrame = BitmapFactory.decodeStream(new ByteArrayInputStream(Base64.decode(frameString, Base64.DEFAULT)));
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inPreferredConfig = Bitmap.Config.RGB_565;
                         ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.decode(frameString, Base64.DEFAULT));
-                        if (inputStream == null)
-                            System.out.println("BYTE INPUT STREAM NULL...........");
-                        final Bitmap notifFrame = BitmapFactory.decodeStream(new FlushedInputStream(inputStream));
+                        final Bitmap notifFrame = BitmapFactory.decodeStream(inputStream);
+                        inputStream.reset();
                         String thumbpath;
                         if(notifFrame == null){
                             System.out.println("NOTIF FRAME NULL...........");
                             thumbpath = null;
                         }else
                             thumbpath = saveImage(context,notifFrame, _date);
-                        if(p == BYTE_LIGHT)
-                            _name = lightTitle;
                         db.addRow(new DatabaseRow(_name, _date, 0, thumbpath, recvdHashID));
                         System.out.println("NOTIFY SERVICE THUMBPATH : " + thumbpath );
 
@@ -282,12 +271,9 @@ public class NotifyService extends FirebaseMessagingService {
                     System.out.println("NOTIFICATION ID :" + MY_NOTIFICATION_ID);
 
                     if((p == BYTE_FACEFOUND_VDOGENERATING || p == BYTE_ALERT1) && notifStatus ) {
-
                         notifBuilder.setWhen(time);
                         notificationManager.notify(MY_NOTIFICATION_ID, notifBuilder.build());
-
-                    }else if(!notifStatus)
-                        System.out.println("First Notif not build, NOTIF STATUS : " + notifStatus);
+                    }
 
                     if ((p == BYTE_FACEFOUND_VDOGENERATED || p == BYTE_ALERT2 || p == BYTE_ABRUPT_END)&& notifStatus) {
 
@@ -307,25 +293,24 @@ public class NotifyService extends FirebaseMessagingService {
 
 
                     if(p == BYTE_LIGHT && notifStatus){
-                        lightTitle = lightTitle + corresProduct;
                         notificationManager.notify(MY_NOTIFICATION_ID,lightBuilder.build());
-                        //_name = lightTitle;
 
                     }else if(!notifStatus)
                         System.out.println("Light change notif not build, NOTIF STATUS : " + notifStatus);
 
                     if(p == BYTE_CAMERA_INACTIVE){
-                       camBuilder.setContentTitle(camTitle + corresProduct);
+                       camBuilder.setContentTitle(corresProduct + ": Camera Inactive alert" );
                         notificationManager.notify(MY_NOTIFICATION_ID,camBuilder.build());
 
                     }
                     if(p == BYTE_MEMORY_ALERT){
                         int memoryspace = json.getInt("%memory");
-                        memoryBuilder.setContentTitle(memoryTitle + corresProduct);
-                        if(memoryspace == 90)
+                        if(memoryspace == 90) {
+                            memoryBuilder.setContentTitle(corresProduct + ": Low storage space alert");
                             memoryBuilder.setContentText("Your storage space is " + memoryspace + "% full. ");
+                        }
                         else {
-                            memoryBuilder.setContentTitle("System      : " + corresProduct);
+                            memoryBuilder.setContentTitle(corresProduct + ": Memory Alert");
                             memoryBuilder.setContentText("Your storage space was " + memoryspace + "% full. ");
                         }
                         notificationManager.notify(MY_NOTIFICATION_ID,memoryBuilder.build());
@@ -404,31 +389,6 @@ public class NotifyService extends FirebaseMessagingService {
         System.out.println("Returning thumbpath saveimage");
         return name;
     }
-
-    static class FlushedInputStream extends FilterInputStream {
-        public FlushedInputStream(InputStream inputStream) {
-            super(inputStream);
-        }
-
-        @Override
-        public long skip(long n) throws IOException {
-            long totalBytesSkipped = 0L;
-            while (totalBytesSkipped < n) {
-                long bytesSkipped = in.skip(n - totalBytesSkipped);
-                if (bytesSkipped == 0L) {
-                    int b = read();
-                    if (b < 0) {
-                        break;  // we reached EOF
-                    } else {
-                        bytesSkipped = 1; // we read one byte
-                    }
-                }
-                totalBytesSkipped += bytesSkipped;
-            }
-            return totalBytesSkipped;
-        }
-    }
-
 
     public static String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
