@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -187,10 +188,14 @@ public class LivefeedFragment extends Fragment {
                                 }
                                 handshake_socket = new Socket(servername, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
-                                OutputStream out = handshake_socket.getOutputStream();
+                                /*OutputStream out = handshake_socket.getOutputStream();
                                 out.write(1);
-                                out.flush();
-                                System.out.println("P=1 PATHAVLA");
+                                out.flush();*/
+                                String hashId = LoginActivity.clickedProductHashID;
+                                DataOutputStream dout = new DataOutputStream(handshake_socket.getOutputStream());
+                                dout.writeUTF(hashId);
+                                dout.flush();
+                                System.out.println("HASH ID PATHAVLI");
                                 InputStream in = handshake_socket.getInputStream();
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);
@@ -275,10 +280,15 @@ public class LivefeedFragment extends Fragment {
                                 while (!LivefeedFragment.sendMsg(BYTE_START_AUDIO)){}
                                 handshake_socket = new Socket(servername, AudioTcpPort);
                                 System.out.println(".............audio tcp port connected...!!!");
-                                OutputStream out = handshake_socket.getOutputStream();
+                                /*OutputStream out = handshake_socket.getOutputStream();
                                 out.write(1);
                                 out.flush();
-                                System.out.println("P=1 PATHAVLA");
+                                System.out.println("P=1 PATHAVLA");*/
+                                String hashId = LoginActivity.clickedProductHashID;
+                                DataOutputStream dout = new DataOutputStream(handshake_socket.getOutputStream());
+                                dout.writeUTF(hashId);
+                                dout.flush();
+                                System.out.println("HASH ID PATHAVLI");
                                 InputStream in = handshake_socket.getInputStream();
                                 p = in.read();
                                 System.out.println("Tyani p pathavla P =" + p);

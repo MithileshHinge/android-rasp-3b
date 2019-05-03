@@ -13,6 +13,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 public class Client extends Thread {
     private String serverName;
@@ -20,7 +21,7 @@ public class Client extends Thread {
     private Socket socket;
     private int udpPort = 7663;
     private int port = 7666;
-    private volatile boolean livefeed = true;
+    private volatile boolean livefeed = true, frameReceived = false;
     // private InputStream in;
     //private OutputStream out;
     private static SharedPreferences spref_ip;
@@ -45,19 +46,24 @@ public class Client extends Thread {
             udpSocket = new DatagramSocket();
 
             //UDP Hole-punching
-            byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
-            System.out.println("Client hash id : " + new String(handshakeBuf));
+             new Thread(new Runnable() {
+                 @Override
+                 public void run() {
+                     byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
+                     DatagramPacket handshakePacket = null;
+                     try {
+                         handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), udpPort);
+                         while(!frameReceived) {
+                             System.out.println("Sending handshake....");
+                             udpSocket.send(handshakePacket);
+                         }
 
-            /*byte[] a = new byte[256];
-            byte[] handshakeBuf = new byte[hashID.length + a.length];
-            System.arraycopy(hashID,0,handshakeBuf,0,hashID.length);
-            System.arraycopy(a,0,handshakeBuf,hashID.length,a.length);*/
+                     }catch (IOException e) {
+                             e.printStackTrace();
+                         }
+                     }
+             }).start();
 
-            DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName), udpPort);
-            for (int i=0; i<10; i++){
-                System.out.println("Sending handshake....");
-                udpSocket.send(handshakePacket);
-            }
 
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
             /*dOut.writeInt(udpSocket.getLocalPort());
@@ -89,13 +95,13 @@ public class Client extends Thread {
                 try {
                     udpSocket.setSoTimeout(5000);
                     udpSocket.receive(imgPacket);
-                    System.out.println(imgPacket.getAddress());
+                    //System.out.println(imgPacket.getAddress());
                 }catch(SocketTimeoutException e){
                     e.printStackTrace();
                     continue;
                 }
                 byte[] imgBuf = imgPacket.getData();
-
+                frameReceived = true;
                 LivefeedFragment.frame = BitmapFactory.decodeByteArray(imgBuf, 0, imgBuf.length);
                 LivefeedFragment.frameChanged = true;
 
@@ -121,6 +127,7 @@ public class Client extends Thread {
 
     public void end(){
         livefeed = false;
+        frameReceived = false;
         System.out.println("live feed false keli");
     }
 }
