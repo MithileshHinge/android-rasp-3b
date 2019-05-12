@@ -52,11 +52,12 @@ public class LivefeedFragment extends Fragment {
     public static boolean frameChanged = false;
     public static Bitmap frame = null;
     private static Client t;
+    private static Listen listen;
 
     public byte[] buffer;
     public static int p;
     public static DatagramSocket AudioSocket;
-    private int AudioPort = 7671, AudioTcpPort = 7670;
+    private int AudioPort = 7671, AudioTcpPort = 7670 ;
 
     static AudioRecord recorder;
     private int sampleRate = 44100;
@@ -64,7 +65,8 @@ public class LivefeedFragment extends Fragment {
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize;
-    private boolean status = false;
+    private boolean voice_status = false;
+    public volatile boolean status;
     private static String servername;
     private Socket handshake_socket;
     private static SharedPreferences spref_ip;
@@ -73,7 +75,7 @@ public class LivefeedFragment extends Fragment {
     private static int msgPort = 7676;
     public static final byte BYTE_STOP_ALARM = 8, BYTE_START_ALARM = 7, BYTE_START_LIVEFEED=2, BYTE_START_AUDIO=13, BYTE_GET_SYSIP=15;
 
-    public static ToggleButton Alarm_button, Voice_button;
+    public static ToggleButton Alarm_button, Voice_button, Listen_button;
 
     public static final int REQUEST_MICROPHONE = 1;
 
@@ -86,8 +88,10 @@ public class LivefeedFragment extends Fragment {
         Button photo_button = (Button)  v.findViewById(R.id.push_button);
         Voice_button = (ToggleButton) v.findViewById(R.id.Voice_button);
         Alarm_button = (ToggleButton) v.findViewById(R.id.Alarm_button);
+        Listen_button = (ToggleButton) v.findViewById(R.id.Speaker_button);
         Voice_button.setChecked(false);
         Alarm_button.setChecked(false);
+        Listen_button.setChecked(false);
 
         servername = RegistrationActivity.serverName;
         System.out.println("........................servername  " + servername);
@@ -96,14 +100,6 @@ public class LivefeedFragment extends Fragment {
         volume =spref_volume.getInt("volume",5);
         System.out.println("LIVEFEED VOLUME : " + volume);
         volume = volume + 20;
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!LivefeedFragment.sendMsg(volume)) {}
-            }
-        }).start();*/
-
-
 
         progressDialg = new ProgressDialog(getContext());
         System.out.println("                 Progress Dialog initiated!!!!!!!!!!!!");
@@ -113,6 +109,7 @@ public class LivefeedFragment extends Fragment {
 
         t = new Client();
         t.start();
+        listen = new Listen();
         final Handler handler = new Handler();
 
 
@@ -178,7 +175,7 @@ public class LivefeedFragment extends Fragment {
                         ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.RECORD_AUDIO}, REQUEST_MICROPHONE);
                         return;
                     }
-                    status = true;
+                    voice_status = true;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -218,7 +215,7 @@ public class LivefeedFragment extends Fragment {
                 } else {
                     System.out.println("STOP BUTTON");
                     Toast.makeText(v.getContext(), "Recording stopped !", Toast.LENGTH_SHORT).show();
-                    status = false;
+                    voice_status = false;
                     if (recorder != null) {
                         recorder.release();
                         AudioSocket.close();
@@ -228,6 +225,19 @@ public class LivefeedFragment extends Fragment {
                             e.printStackTrace();
                         }
                     }
+                }
+            }
+        });
+
+        Listen_button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(isChecked){
+                    listen.start();
+                    System.out.println("Listen Started");
+                }else{
+                    listen.end();
+                    System.out.println("Listen Stopped");
                 }
             }
         });
@@ -271,7 +281,7 @@ public class LivefeedFragment extends Fragment {
             case REQUEST_MICROPHONE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    status=true;
+                    voice_status=true;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -373,7 +383,7 @@ public class LivefeedFragment extends Fragment {
                     recorder.startRecording();
                     System.out.println("######RECORDING START JHALI");
 
-                    while (status)
+                    while (voice_status)
                     {
                         //reading data from MIC into buffer
                         minBufSize = recorder.read(buffer,0,buffer.length);
@@ -429,6 +439,8 @@ public class LivefeedFragment extends Fragment {
     @Override
     public void onPause() {
         t.end();
+
+        //listen.end();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -436,8 +448,8 @@ public class LivefeedFragment extends Fragment {
                 System.out.println("....alarm off");
             }
         }).start();
-        if(status) {
-            status = false;
+        if(voice_status) {
+            voice_status = false;
             if (recorder != null) {
                 recorder.release();
                 AudioSocket.close();
@@ -451,38 +463,6 @@ public class LivefeedFragment extends Fragment {
         Voice_button.setChecked(false);
         super.onPause();
     }
-
-    /*@Override
-    public void onResume() {
-        t = new Client();
-        t.start();
-        final Handler handler = new Handler();
-
-
-        Thread t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (frameChanged) {
-                        if(progressDialg.isShowing()){
-                            System.out.println("                     Progress dialog running");
-                            progressDialg.dismiss();
-                        }
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                img.setImageBitmap(frame);
-                            }
-                        });
-                        frameChanged = false;
-                    }
-                }
-            }
-        });
-        t2.start();
-        super.onResume();
-    }*/
 
     public static boolean sendMsg(int p){
         Socket msgSocket;

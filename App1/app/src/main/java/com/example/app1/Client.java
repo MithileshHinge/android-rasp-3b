@@ -31,6 +31,7 @@ public class Client extends Thread {
 
     public void run() {
         try {
+            frameReceived = false;
 
             //serverName = MainActivity.jIP.getText().toString();
             //serverName="192.168.7.2";
@@ -54,7 +55,7 @@ public class Client extends Thread {
                      try {
                          handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), udpPort);
                          while(!frameReceived) {
-                             System.out.println("Sending handshake....");
+                             System.out.println("Sending handshake...." + frameReceived);
                              udpSocket.send(handshakePacket);
                          }
 
@@ -105,7 +106,7 @@ public class Client extends Thread {
                 LivefeedFragment.frame = BitmapFactory.decodeByteArray(imgBuf, 0, imgBuf.length);
                 LivefeedFragment.frameChanged = true;
 
-                System.out.println("Frame received........");
+                //System.out.println("Frame received........");
 
             }
             livefeed = true;
@@ -127,7 +128,7 @@ public class Client extends Thread {
 
     public void end(){
         livefeed = false;
-        frameReceived = false;
+        frameReceived = true;
         System.out.println("live feed false keli");
     }
 }
