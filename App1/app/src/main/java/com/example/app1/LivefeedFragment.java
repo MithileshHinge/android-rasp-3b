@@ -15,6 +15,9 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+
+
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -41,6 +44,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+
 
 /**
  * Created by Home on 19-07-2017.
@@ -105,6 +110,16 @@ public class LivefeedFragment extends Fragment {
         System.out.println("                 Progress Dialog initiated!!!!!!!!!!!!");
         progressDialg.setIndeterminate(true);
         progressDialg.setMessage("Establishing connection...");
+        progressDialg.setCanceledOnTouchOutside(false);
+        progressDialg.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                System.out.println("ON CANCEL");
+                ActivityLogFragment activityLogFragment = new ActivityLogFragment();
+                android.support.v4.app.FragmentTransaction activityFragmentTransaction = getFragmentManager().beginTransaction();
+                activityFragmentTransaction.replace(R.id.frame, activityLogFragment,"ACTIVITY").commit();
+            }
+        });
         progressDialg.show();
 
         t = new Client();
@@ -261,8 +276,7 @@ public class LivefeedFragment extends Fragment {
                                 //give error
                                 ActivityLogFragment activityLogFragment = new ActivityLogFragment();
                                 android.support.v4.app.FragmentTransaction activityFragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                                activityFragmentTransaction.replace(R.id.frame, activityLogFragment,"ACTIVITY");
-                                activityFragmentTransaction.commit();
+                                activityFragmentTransaction.replace(R.id.frame, activityLogFragment,"ACTIVITY").commit();
                             }
                             System.out.println("....alarm off");
                         }
@@ -436,10 +450,12 @@ public class LivefeedFragment extends Fragment {
     }
 
 
+
     @Override
     public void onPause() {
+        System.out.println("LIVEFEED ON PAUSE");
         t.end();
-
+        //TODO Listen stopped
         //listen.end();
         new Thread(new Runnable() {
             @Override
@@ -467,14 +483,24 @@ public class LivefeedFragment extends Fragment {
     public static boolean sendMsg(int p){
         Socket msgSocket;
         try {
-            System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
+            //System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
             msgSocket = new Socket(RegistrationActivity.serverName, msgPort);
             OutputStream out =  msgSocket.getOutputStream();
             InputStream in = msgSocket.getInputStream();
             out.write(p);
             out.flush();
             int r = in.read();
-            System.out.println(".............byte sent : " + p +"   reply = "+r);
+            if(r==0){
+                LoginActivity.livefeedDrawer = false;
+                System.out.println("MESSAGE THREAD 0");
+              //TODO activity and livefeedoff
+
+            }else if(r==-1){
+                //TODO Connection Broken!
+                System.out.println("MESSAGE THREAD -1");
+
+            }
+            System.out.println(".............byte sent : " + p +"   reply = " + r);
             try{
                 msgSocket.close();
             }catch (IOException e){

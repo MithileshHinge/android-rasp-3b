@@ -55,7 +55,7 @@ public class Client extends Thread {
                      try {
                          handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), udpPort);
                          while(!frameReceived) {
-                             System.out.println("Sending handshake...." + frameReceived);
+                             //System.out.println("Sending handshake...." + frameReceived);
                              udpSocket.send(handshakePacket);
                          }
 
