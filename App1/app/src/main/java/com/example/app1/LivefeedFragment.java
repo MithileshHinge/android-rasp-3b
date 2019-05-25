@@ -71,7 +71,7 @@ public class LivefeedFragment extends Fragment {
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize;
     private boolean voice_status = false;
-    public volatile boolean status;
+    public volatile boolean audioReceived;
     private static String servername;
     private Socket handshake_socket;
     private static SharedPreferences spref_ip;
@@ -137,7 +137,6 @@ public class LivefeedFragment extends Fragment {
                             System.out.println("                     Progress dialog running");
                             progressDialg.dismiss();
                         }
-
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -376,10 +375,22 @@ public class LivefeedFragment extends Fragment {
             public void run()
             {
                 try{
-
                     AudioSocket = new DatagramSocket();
                     Log.d("VS", "Socket Created");
                     System.out.println("DataGramSocket BANAVLA!!!!!");
+                    //UDP HOLE PUNCHING
+
+                    byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
+                    DatagramPacket handshakePacket = null;
+                    try {
+                        handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), AudioPort);
+                        for(int i=0;i<10;i++) {
+                            System.out.println("Sending audio handshake....");
+                            AudioSocket.send(handshakePacket);
+                        }
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     minBufSize = 4096;
                     buffer = new byte[minBufSize];

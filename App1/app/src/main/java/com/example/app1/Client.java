@@ -6,8 +6,11 @@ package com.example.app1;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -17,62 +20,35 @@ import java.net.UnknownHostException;
 
 public class Client extends Thread {
     private String serverName;
-    private DatagramSocket udpSocket;
+    //private DatagramSocket udpSocket;
     private Socket socket;
-    private int udpPort = 7663;
+    //private int udpPort = 7663;
     private int port = 7666;
-    private volatile boolean livefeed = true, frameReceived = false;
-    // private InputStream in;
+    private volatile boolean livefeed = true;
+    //private InputStream in;
     //private OutputStream out;
     private static SharedPreferences spref_ip;
+
     Client() {
 
     }
 
     public void run() {
         try {
-            frameReceived = false;
 
-            //serverName = MainActivity.jIP.getText().toString();
-            //serverName="192.168.7.2";
-            /*spref_ip = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
-            serverName = spref_ip.getString("ip_address","");
-*/
             serverName = RegistrationActivity.serverName;
             while (!LivefeedFragment.sendMsg(LivefeedFragment.volume)){}
             while(!LivefeedFragment.sendMsg(LivefeedFragment.BYTE_START_LIVEFEED)){}
             System.out.println("LIVEFEED TCP HANDSHAKE DONE");
             socket = new Socket(serverName, port);
             socket.setSoTimeout(2000);
-            udpSocket = new DatagramSocket();
-
-            //UDP Hole-punching
-             new Thread(new Runnable() {
-                 @Override
-                 public void run() {
-                     byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
-                     DatagramPacket handshakePacket = null;
-                     try {
-                         handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), udpPort);
-                         while(!frameReceived) {
-                             //System.out.println("Sending handshake...." + frameReceived);
-                             udpSocket.send(handshakePacket);
-                         }
-
-                     }catch (IOException e) {
-                             e.printStackTrace();
-                         }
-                     }
-             }).start();
-
-
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-            /*dOut.writeInt(udpSocket.getLocalPort());
-            dOut.flush();*/
+            DataInputStream dIn = new DataInputStream(socket.getInputStream());
             dOut.writeUTF(LoginActivity.clickedProductHashID);
             dOut.flush();
-
+            System.out.println("HASH ID SENT");
             while(true) {
+                System.out.println("IN WHILE TRUE");
                 int m;
                 try {
                     m = socket.getInputStream().read();
@@ -85,32 +61,39 @@ public class Client extends Thread {
                     return;
                 }else
                     break;
+
             }
-            socket.setSoTimeout(0);
 
             while (livefeed) {
-
-                byte[] buf = new byte[64000];
-                DatagramPacket imgPacket = new DatagramPacket(buf, buf.length);
-
-                try {
-                    udpSocket.setSoTimeout(5000);
-                    udpSocket.receive(imgPacket);
-                    //System.out.println(imgPacket.getAddress());
-                }catch(SocketTimeoutException e){
+                byte[] bytes;
+                int size;
+                try{
+                    socket.setSoTimeout(5000);
+                    size = dIn.readInt();
+                    System.out.println("Buffer size : " + size);
+                    bytes = new byte[size];
+                    dIn.readFully(bytes,0,size);
+                    System.out.println("BYTES READ : " + bytes);
+                    //socket.close();
+                }catch (SocketTimeoutException e){
                     e.printStackTrace();
                     continue;
                 }
-                byte[] imgBuf = imgPacket.getData();
-                frameReceived = true;
-                LivefeedFragment.frame = BitmapFactory.decodeByteArray(imgBuf, 0, imgBuf.length);
-                LivefeedFragment.frameChanged = true;
 
-                //System.out.println("Frame received........");
+                /*BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds= true;*/
+                //LivefeedFragment.frame = BitmapFactory.decodeStream(new FlushedInputStream(dIn),null,options);
+                LivefeedFragment.frame = BitmapFactory.decodeByteArray(bytes,0,size);
+                if(LivefeedFragment.frame == null)
+                    System.out.println("FRAME NULL");
+                else{
+                    LivefeedFragment.frameChanged = true;
+                }
+                System.out.println("Frame received........");
+
 
             }
             livefeed = true;
-            socket.close();
             System.out.println("CLIENT BANDA JHALA");
 
         } catch (IOException e) {
@@ -118,8 +101,6 @@ public class Client extends Thread {
             try {
                 if(socket!=null)
                     socket.close();
-                if(udpSocket!=null)
-                    udpSocket.close();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -128,7 +109,12 @@ public class Client extends Thread {
 
     public void end(){
         livefeed = false;
-        frameReceived = true;
+        try {
+            if(socket!=null)
+                socket.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         System.out.println("live feed false keli");
     }
 }
