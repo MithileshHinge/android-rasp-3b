@@ -247,6 +247,7 @@ public class LivefeedFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if(isChecked){
+                    listen = new Listen();
                     listen.start();
                     System.out.println("Listen Started");
                 }else{
@@ -467,7 +468,8 @@ public class LivefeedFragment extends Fragment {
         System.out.println("LIVEFEED ON PAUSE");
         t.end();
         //TODO Listen stopped
-        //listen.end();
+        if(listen.isAlive())
+            listen.end();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -494,7 +496,7 @@ public class LivefeedFragment extends Fragment {
     public static boolean sendMsg(int p){
         Socket msgSocket;
         try {
-            //System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
+            System.out.println(".........into send msg................. with servername = "+ RegistrationActivity.serverName);
             msgSocket = new Socket(RegistrationActivity.serverName, msgPort);
             OutputStream out =  msgSocket.getOutputStream();
             InputStream in = msgSocket.getInputStream();
@@ -503,6 +505,7 @@ public class LivefeedFragment extends Fragment {
             int r = in.read();
             if(r==0){
                 LoginActivity.livefeedDrawer = false;
+                sendMsg(p);
                 System.out.println("MESSAGE THREAD 0");
               //TODO activity and livefeedoff
 

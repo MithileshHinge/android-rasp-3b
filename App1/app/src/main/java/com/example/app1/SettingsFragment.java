@@ -37,7 +37,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         SharedPreferences.Editor edit = spref.edit();
         if(p2 instanceof ListPreference){
             ListPreference listPref = (ListPreference) p2;
-
+            p2.setEnabled(LoginActivity.livefeedDrawer);
             String mode = spref.getString("modeType",null);
             System.out.println("...........mode = "+mode);
             i=0;
@@ -58,43 +58,37 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             p2.setSummary(listPref.getEntry());
             edit.putString("modeType",listPref.getEntry().toString());
             edit.apply();
-            /*System.out.println("...........listPref.getEntry() = "+listPref.getEntry());
-            System.out.println("...........listPref.getEntry().toString() = "+listPref.getEntry().toString());*/
+
         }
 
         Preference p3 = getPreferenceScreen().findPreference("keyy1");
         if (p3 instanceof EditTextPreference) {
-            //SharedPreferences spref_user = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
             p3.setSummary(spref.getString("username",""));
         }
 
         Preference p4 = getPreferenceScreen().findPreference("keyy2");
         if (p4 instanceof EditTextPreference) {
-            //SharedPreferences spref_product = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
             p4.setSummary(spref.getString("name",""));
         }
 
         Preference p5 = getPreferenceScreen().findPreference("keyy3");
         if (p5 instanceof EditTextPreference) {
-            //SharedPreferences spref_email = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
             p5.setSummary(spref.getString("email",""));
         }
 
         Preference p8 = getPreferenceScreen().findPreference("keyy4");
         if (p8 instanceof EditTextPreference) {
-            //SharedPreferences spref_email = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
             p8.setSummary(spref.getString("sysLocalIP",""));
         }
 
         Preference p6 = getPreferenceScreen().findPreference("key1");
-        //SharedPreferences spref_mobNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
         boolean mobNotif = spref.getBoolean("mobNotif",false);
         if(p6 instanceof SwitchPreferenceCompat){
             ((SwitchPreferenceCompat) p6).setChecked(mobNotif);
         }
 
         Preference p7 = getPreferenceScreen().findPreference("key5");
-        //SharedPreferences spref_emailNotif = getContext().getSharedPreferences(LoginActivity.clickedProductHashID,Context.MODE_PRIVATE);
+        p7.setEnabled(LoginActivity.livefeedDrawer);
         boolean emailNotif = spref.getBoolean("emailNotif",false);
         if(p7 instanceof SwitchPreferenceCompat){
             ((SwitchPreferenceCompat) p7).setChecked(emailNotif);
@@ -102,63 +96,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         Preference p1 = getPreferenceScreen().findPreference("key3");
         int volume = spref.getInt("volume",5);
-        /*if(p1 instanceof SeekBarPreference){
-            ((SeekBarPreference) p8).setValue(volume);
-        }*/
 
-
-        /*Preference p2 = getPreferenceScreen().findPreference("key4");
-        SharedPreferences spref_mode = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor edit = spref_mode.edit();
-        if(p2 instanceof ListPreference){
-            ListPreference listPref = (ListPreference) p2;
-            if(i == 1){
-                ((ListPreference) p2).setValueIndex(0);
-                i++;
-            }
-            p2.setSummary(listPref.getEntry());
-            edit.putString("mode_type",listPref.getEntry().toString());
-            edit.commit();
-        }
-
-        Preference p3 = getPreferenceScreen().findPreference("keyy1");
-
-        if (p3 instanceof EditTextPreference) {
-            SharedPreferences spref_user = PreferenceManager.getDefaultSharedPreferences(getContext());
-            //SharedPreferences.Editor edit2 = spref_user.edit();
-            //EditTextPreference editTextPref = (EditTextPreference) p3;
-            if (p3.getTitle().toString().toLowerCase().contains("Username")) {
-                p3.setSummary(spref_user.getString("username",""));
-            } else {
-                p3.setSummary(spref_user.getString("username",""));
-                //edit2.putString("username",editTextPref.getText());
-                //edit2.commit();
-            }
-        }
-
-        Preference p4 = getPreferenceScreen().findPreference("keyy2");
-
-        if (p4 instanceof EditTextPreference) {
-            EditTextPreference editTextPref = (EditTextPreference) p4;
-            if (p4.getTitle().toString().toLowerCase().contains("Password")) {
-                p4.setSummary("******");
-            } else {
-                p4.setSummary(editTextPref.getText());
-            }
-        }
-
-        Preference p5 = getPreferenceScreen().findPreference("keyy3");
-
-        if (p5 instanceof EditTextPreference) {
-            SharedPreferences spref_email = PreferenceManager.getDefaultSharedPreferences(getContext());
-            //SharedPreferences.Editor edit3 = spref_email.edit();
-            //EditTextPreference editTextPref = (EditTextPreference) p5;
-            if (p5.getTitle().toString().toLowerCase().contains("Email Id")) {
-                p5.setSummary(spref_email.getString("email_id",""));
-            } else {
-                p5.setSummary(spref_email.getString("email_id",""));
-            }
-        }*/
     }
     @Override
     public void onResume() {

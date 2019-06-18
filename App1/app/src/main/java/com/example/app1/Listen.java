@@ -61,7 +61,7 @@ public class Listen extends Thread {
             }
 
             //UDP Hole-punching
-            /*byte[] handshakeBuf = new byte[256];
+            /*byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
             DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(serverName),Listen_UDP_Port);
             for (int i=0; i<10; i++){
                 System.out.println("Sending listen handshake....");
@@ -70,7 +70,7 @@ public class Listen extends Thread {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    byte[] handshakeBuf = new byte[256];
+                    byte[] handshakeBuf = LoginActivity.clickedProductHashID.getBytes();
                     DatagramPacket handshakePacket = null;
                     try {
                         handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length, InetAddress.getByName(RegistrationActivity.serverName), Listen_UDP_Port);
@@ -94,7 +94,7 @@ public class Listen extends Thread {
             audioTrack.play();
 
             listenSocket.setSoTimeout(5000);
-            while(true){
+            while(listen_status){
 
                 //System.out.println(".......blah blah.......");
                 //listenSocket = new DatagramSocket(Listen_UDP_Port);
@@ -102,13 +102,13 @@ public class Listen extends Thread {
                 try {
                     listenSocket.receive(packet);
                     listenPacketRx = true;
-                    System.out.println("BUFFER" + packet.getLength()/1024 + " " + packet.getData().length);
+                    //System.out.println("BUFFER" + packet.getLength()/1024 + " " + packet.getData().length);
                     System.out.println("PACKETS RECEIVED DATA:" + String.valueOf(buffer));
 
                 }catch (SocketTimeoutException e){
                     e.printStackTrace();
                 }
-                System.out.println("time ................. = " + (System.currentTimeMillis() - time1) );
+                //System.out.println("time ................. = " + (System.currentTimeMillis() - time1) );
                 audioTrack.write(buffer, 0, minBufSize);
                 audioTrack.play();
 
@@ -126,12 +126,8 @@ public class Listen extends Thread {
                         }
 
                         audioTrack.release();
-                        System.out.println("!!! AUDIO TRACK RELEASED");
+                        //System.out.println("!!! AUDIO TRACK RELEASED");
                     }
-
-                    //while (!LivefeedFragment.sendMsg(BYTE_STOP_LISTEN)){}
-
-
                     listen_status = true;
                     handshake_socket.close();
                     System.out.println("LISTEN CLIENT BANDA JHALA");

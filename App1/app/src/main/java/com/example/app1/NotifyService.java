@@ -68,7 +68,7 @@ public class NotifyService extends FirebaseMessagingService {
 
     public JSONObject json;
     public RemoteMessage remoteMessage;
-    public static String recvdHashID, corresProduct, lightTitle;
+    public static String recvdHashID, corresProduct;
     public static int serialNo;
     public static volatile boolean notifStatus;
     //List<Integer> notifIDList = new ArrayList<>();
@@ -82,10 +82,11 @@ public class NotifyService extends FirebaseMessagingService {
 
     @Override
     public void onCreate() {
+        System.out.println("...........NOTIF SERVICE ON CREATE...........");
         //notifyServiceReceiver = new NotifyServiceReceiver();
         db = new DatabaseHandler(getApplicationContext());
         super.onCreate();
-        System.out.println("...........NOTIF SERVICE ON CREATE...........");
+
 
     }
 

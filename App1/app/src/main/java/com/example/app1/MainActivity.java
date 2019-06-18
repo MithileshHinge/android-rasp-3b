@@ -32,6 +32,7 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -364,6 +365,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences loggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         loggedIn.edit().putBoolean("auto_login",false).apply();
         Toast.makeText(view.getContext(), "Logged out", Toast.LENGTH_SHORT).show();
+        try {
+            LoginActivity.connServerSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
         startActivity(intent);
         finish();
