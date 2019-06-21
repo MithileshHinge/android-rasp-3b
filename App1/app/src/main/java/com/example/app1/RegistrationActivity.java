@@ -25,12 +25,17 @@ public class RegistrationActivity extends AppCompatActivity {
 
     public static String serverName = "13.233.111.181";
     public static RecyclerView productView;
-    public static List<Product> allProducts = new ArrayList<>();
     public static String clickedItem;
+    /*public static List<Product> allProducts = new ArrayList<>();
     public static Set<String> hashIDList = new HashSet<String>();
-    public static Set<String> productNameList = new HashSet<String>();
+    public static Set<String> productNameList = new HashSet<String>();*/
+    public static List<Product> allProducts = new ArrayList<>();
+    public static String hashIDList;
+    public static String productNameList;
+    // static Product allProducts;
     public static SharedPreferences spref_list;
     public static int productSerialNo;
+    private static boolean productExist;
 
 
     @Override
@@ -38,8 +43,8 @@ public class RegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.registration_screen);
 
+        productExist = false;
         //FrameLayout fLayout = (FrameLayout) findViewById(R.id.activity_to_do);
-
         productView = (RecyclerView)findViewById(R.id.product_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         productView.setLayoutManager(linearLayoutManager);
@@ -51,8 +56,10 @@ public class RegistrationActivity extends AppCompatActivity {
         //TODO: reproduce the stored allProducts
 
         spref_list = getSharedPreferences("Lists", MODE_PRIVATE);
-        productNameList = spref_list.getStringSet("productNameList",new HashSet<String>());
-        hashIDList = spref_list.getStringSet("hashIDList",new HashSet<String>());
+        productNameList = spref_list.getString("productNameList",null);
+        hashIDList = spref_list.getString("hashIDList",null);
+        /*productNameList = spref_list.getStringSet("productNameList",new HashSet<String>());
+        hashIDList = spref_list.getStringSet("hashIDList",new HashSet<String>());*/
 
         System.out.println("hashIDList = "+hashIDList);
 
@@ -65,24 +72,20 @@ public class RegistrationActivity extends AppCompatActivity {
         edit.putStringSet("productNameList",productNameList);
         edit.apply();*/
 
-        allProducts = new ArrayList<>();
-        for(String s:hashIDList){
-            System.out.println("hash id = " + s);
-            SharedPreferences preferences = getSharedPreferences(s,MODE_APPEND);
-            String n = preferences.getString("name",null);
-            String h = preferences.getString("hashID",null);
-            String u = preferences.getString("username",null);
-            String pa = preferences.getString("password",null);
-            Boolean li = preferences.getBoolean("loggedIn",false);
-            System.out.println("name = "+n+" hashID = "+h+" username = "+u+" password = "+pa+" logged in = "+li);
-            Product p = new Product(n,h);
-            p.setName(n);
-            p.setHashID(h);
-            p.setUsername(u);
-            p.setPassword(pa);
-            p.setIfLoggedIn(li);
-            allProducts.add(p);
-        }
+        SharedPreferences preferences = getSharedPreferences(hashIDList,MODE_APPEND);
+        String n = preferences.getString("name",null);
+        String h = preferences.getString("hashID",null);
+        String u = preferences.getString("username",null);
+        String pa = preferences.getString("password",null);
+        Boolean li = preferences.getBoolean("loggedIn",false);
+        System.out.println("name = "+n+" hashID = "+h+" username = "+u+" password = "+pa+" logged in = "+li);
+        Product p = new Product(n,h);
+        p.setName(n);
+        p.setHashID(h);
+        p.setUsername(u);
+        p.setPassword(pa);
+        p.setIfLoggedIn(li);
+        allProducts.add(p);
 
         System.out.println("allProducts = "+allProducts);
 
@@ -92,15 +95,19 @@ public class RegistrationActivity extends AppCompatActivity {
         product.setIfLoggedIn(true);
         allProducts.add(product);*/
 
-        for (Product fileEntry : allProducts) {
-            System.out.println(fileEntry.getName() +"........" + fileEntry.getHashID());
-        }
 
-        if(allProducts.size() > 0){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.addProduct);
+        if(allProducts.size()>0){
             System.out.println(".......Products are there.........");
-            productView.setVisibility(View.VISIBLE);
-            ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
-            productView.setAdapter(mAdapter);
+            fab.setVisibility(View.INVISIBLE);
+            if(!allProducts.get(0).getIfLoggedIn()){
+                productView.setVisibility(View.VISIBLE);
+                ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+                productView.setAdapter(mAdapter);
+            }else {
+                //TODO Direct login
+            }
+
 
         }else {
             System.out.println("........No products........");
@@ -108,11 +115,9 @@ public class RegistrationActivity extends AppCompatActivity {
             Toast.makeText(this, "There is no product in the database. Start adding now", Toast.LENGTH_LONG).show();
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.addProduct);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // add new quick task
                 addTaskDialog();
             }
         });
@@ -163,8 +168,8 @@ public class RegistrationActivity extends AppCompatActivity {
                     /*Product newProduct = new Product(name, hashID);
                     newProduct.setIfLoggedIn(false);
                     allProducts.add(newProduct);*/
-                    productNameList.add(name);
-                    hashIDList.add(hashID);
+                    productNameList = name;
+                    hashIDList = hashID;
 
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor edit = sharedPreferences.edit();
@@ -187,8 +192,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
                     SharedPreferences.Editor editor2 = spref_list.edit();
                     editor2.clear();
-                    editor2.putStringSet("hashIDList",hashIDList);
-                    editor2.putStringSet("productNameList",productNameList);
+                    editor2.putString("hashIDList",hashIDList);
+                    editor2.putString("productNameList",productNameList);
                     editor2.apply();
 
                     System.out.println("hashIDList = "+hashIDList);

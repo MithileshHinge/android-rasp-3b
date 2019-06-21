@@ -28,7 +28,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public ProductAdapter(Context context, List<Product> listProducts) {
         this.context = context;
         this.listProducts = listProducts;
-        //mDatabase = new SqliteDatabase(context);
     }
 
     @Override
@@ -126,7 +125,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
                     //TODO: store allProducts
                     System.out.println("name b4 change = "+product.getName());
-                    RegistrationActivity.productNameList.remove(product.getName());
+                    //RegistrationActivity.productNameList.remove(product.getName());
                     String corresHashId = product.getHashID();
 
                     product.setName(name);
@@ -136,11 +135,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                             p.setName(name);
                     }
 
-                    RegistrationActivity.productNameList.add(product.getName());
+
+                    //RegistrationActivity.productNameList.add(product.getName());
                     SharedPreferences.Editor editor2 = RegistrationActivity.spref_list.edit();
                     editor2.clear();
-                    editor2.putStringSet("hashIDList",RegistrationActivity.hashIDList);
-                    editor2.putStringSet("productNameList",RegistrationActivity.productNameList);
+                    editor2.putString("hashIDList",RegistrationActivity.hashIDList);
+                    editor2.putString("productNameList",RegistrationActivity.productNameList);
                     editor2.apply();
 
                     //TODO - store the new name in shared pref!!
@@ -187,16 +187,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                listProducts.remove(position);
+                /*listProducts.remove(position);
                 System.out.println(" deleted name = "+singleProduct.getName());
                 System.out.println(" deleted hash id = "+singleProduct.getHashID());
                 RegistrationActivity.hashIDList.remove(singleProduct.getHashID());
-                RegistrationActivity.productNameList.remove(singleProduct.getName());
+                RegistrationActivity.productNameList.remove(singleProduct.getName());*/
 
                 SharedPreferences.Editor editor2 = RegistrationActivity.spref_list.edit();
                 editor2.clear();
-                editor2.putStringSet("hashIDList",RegistrationActivity.hashIDList);
-                editor2.putStringSet("productNameList",RegistrationActivity.productNameList);
+                editor2.putString("hashIDList",RegistrationActivity.hashIDList);
+                editor2.putString("productNameList",RegistrationActivity.productNameList);
                 editor2.apply();
 
                 SharedPreferences.Editor editor = context.getSharedPreferences(singleProduct.getHashID(),Context.MODE_PRIVATE).edit();

@@ -79,12 +79,12 @@ public class LoginActivity extends AppCompatActivity {
         context = this;
 
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
-        for (Product product : RegistrationActivity.allProducts) {
-            if(product.getName() == RegistrationActivity.clickedItem) {
-                clickedProductHashID = product.getHashID();
-                this.product = product;
-            }
+
+        if(product.getName() == RegistrationActivity.clickedItem) {
+            clickedProductHashID = product.getHashID();
+            this.product = product;
         }
+
         System.out.println("reg id = "+ clickedProductHashID);
         serverName = RegistrationActivity.serverName;
 
