@@ -59,100 +59,129 @@ public class LoginActivity extends AppCompatActivity {
     public static int connServerPort = 7660;
     public static String clickedProductHashID;
     private static String name,username,password, email;
+    private static boolean loggedInState ;
     public static String serverName;
     public static long timeDisableLoginStart, timeDisableLoginEnd;
     private Product product;
     public static String fcmToken, emailID;
-
+    private ProgressDialog progressDialog;
     private static Context context;
     public static Thread connect;
 
-    //TODO : Remove this portion ; just for testing
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.login_screen);
         ButterKnife.inject(this);
-        _loginButton.setEnabled(false);
-
         context = this;
 
         //loggedIn = PreferenceManager.getDefaultSharedPreferences(this);
-
-        if(product.getName() == RegistrationActivity.clickedItem) {
-            clickedProductHashID = product.getHashID();
-            this.product = product;
-        }
-
-        System.out.println("reg id = "+ clickedProductHashID);
+        /*for(Product product : RegistrationActivity.allProducts) {
+            if (product.getName() == RegistrationActivity.clickedItem) {
+                clickedProductHashID = product.getHashID();
+                this.product = product;
+            }
+        }*/
+        product = RegistrationActivity.allProducts.get(0);
+        clickedProductHashID = product.getHashID();
+        loggedInState = product.getIfLoggedIn();
+        System.out.println("reg id = " + clickedProductHashID);
         serverName = RegistrationActivity.serverName;
 
-        //proceed();
+        progressDialog = new ProgressDialog(LoginActivity.this,R.style.AppTheme);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connServerSocket = new Socket(serverName,connServerPort);
-                    // Sending Reg ID
-                    System.out.println("ip address ------ "+connServerSocket.getLocalAddress().getHostName()+"  "+connServerSocket.getLocalAddress());
-                    DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
-                    dOut.writeUTF(clickedProductHashID);
-                    final int i = connServerSocket.getInputStream().read();
-                    System.out.println("....registration variable = "+i);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            _loginButton.setEnabled(true);
-                            _loginButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    login();
-                                }
-                            });
-                            SharedPreferences.Editor edit = getSharedPreferences(clickedProductHashID,MODE_PRIVATE).edit();
-                            if(i==5) {
-                                fcmTokenSent = false;
-                                Toast.makeText(context, "System not registered", Toast.LENGTH_LONG).show();
-                                System.out.println("............System not registered.............");
-                            } else if(i == 1) {
-                                fcmTokenSent = true;
-                                Toast.makeText(context, "System already registered", Toast.LENGTH_LONG).show();
-                                System.out.println("............System already registered.............");
-                            }
-                            edit.putBoolean("fcmTokenSent",fcmTokenSent);
-                            edit.apply();
-                        }
-                    });
-
-                } catch (IOException e) {
-                    System.out.println("**************");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.println("No internet connection\"+'\\n'+\"or the server is currently down..");
-                            Toast.makeText(getBaseContext(), "No internet connection or"+'\n'+"the server is currently down", Toast.LENGTH_LONG).show();
-                            //System.out.println("No internet connection\"+'\\n'+\"or the server is currently down");
-                            context.startActivity(new Intent(context,RegistrationActivity.class));
-                            finish();
-                        }
-                    });
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        SharedPreferences spref = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
-        Boolean loggedInState = spref.getBoolean("loggedIn",false);
-        System.out.println("logged In state = "+loggedInState);
-        if(loggedInState){
-            username = spref.getString("username",new String());
-            password = spref.getString("password",new String());
-            _usernameText.setText(username);
-            _passwordText.setText(password);
+        System.out.println("logged In state = " + loggedInState);
+        if (loggedInState) {
             _loggedIn.setChecked(true);
+            _loginButton.setEnabled(true);
+            progressDialog.show();
+            System.out.println("PROGRESS DIALOG SHOW");
+        }else{
+            _loggedIn.setChecked(false);
+            _loginButton.setEnabled(false);
         }
+
+
+        // TODO: 22-06-2019 Check if feature required
+        username = product.getUsername();
+        password = product.getPassword();
+        _usernameText.setText(username);
+        _passwordText.setText(password);
+
+        register();
+
+        if(loggedInState){
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            login();
+        }
+
+    }
+
+        //proceed();
+        public void register() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        System.out.println("connSeverSocket Thread");
+                        connServerSocket = new Socket(serverName, connServerPort);
+                        // Sending Reg ID
+                        System.out.println("ip address ------ " + connServerSocket.getLocalAddress().getHostName() + "  " + connServerSocket.getLocalAddress());
+                        DataOutputStream dOut = new DataOutputStream(connServerSocket.getOutputStream());
+                        dOut.writeUTF(clickedProductHashID);
+                        final int i = connServerSocket.getInputStream().read();
+                        System.out.println("....registration variable = " + i);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                _loginButton.setEnabled(true);
+                                _loginButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        login();
+                                    }
+                                });
+                                SharedPreferences.Editor edit = getSharedPreferences(clickedProductHashID, MODE_PRIVATE).edit();
+                                if (i == 5) {
+                                    fcmTokenSent = false;
+                                    Toast.makeText(context, "System not registered", Toast.LENGTH_LONG).show();
+                                    System.out.println("............System not registered.............");
+                                } else if (i == 1) {
+                                    fcmTokenSent = true;
+                                    Toast.makeText(context, "System already registered", Toast.LENGTH_LONG).show();
+                                    System.out.println("............System already registered.............");
+                                }
+                                edit.putBoolean("fcmTokenSent", fcmTokenSent);
+                                edit.apply();
+                            }
+                        });
+
+                    } catch (IOException e) {
+                        System.out.println("**************");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("No internet connection\"+'\\n'+\"or the server is currently down..");
+                                Toast.makeText(getBaseContext(), "No internet connection or" + '\n' + "the server is currently down", Toast.LENGTH_LONG).show();
+                                //System.out.println("No internet connection\"+'\\n'+\"or the server is currently down");
+                                context.startActivity(new Intent(context, RegistrationActivity.class));
+                                finish();
+                            }
+                        });
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+
 
         /*loggedIn = getApplicationContext().getSharedPreferences("myPref",0);
         check2 = loggedIn.getBoolean("auto_login",false);
@@ -163,23 +192,23 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_SIGNUP);
             finish();
         }*/
+        }
 
-    }
 
     public void login() {
         Log.d(TAG, "Login");
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,R.style.AppTheme);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
-        if(!checkCredentials()) {
-            onLoginFailed();
-            return;
+        if(!loggedInState) {
+            progressDialog.show();
+            System.out.println("Checking Credentials");
+            if (!checkCredentials()) {
+                progressDialog.dismiss();
+                onLoginFailed();
+                return;
+            }
         }
 
-        System.out.println(".....credentials done");
+        System.out.println(".....credentials done ");
         validate();
         System.out.println(".....validation done");
 
@@ -247,6 +276,7 @@ public class LoginActivity extends AppCompatActivity {
                         public void run() {
                             onLoginSuccess();
                             progressDialog.dismiss();
+
                         }
                     });
 
@@ -399,17 +429,17 @@ public class LoginActivity extends AppCompatActivity {
                     dOut.flush();
                     dOut.writeUTF(password);
                     dOut.flush();
-                    System.out.println("username and password flushed   "+username+"   "+password);
+                    System.out.println("username and password flushed   " + username + "   " + password);
 
-                    SharedPreferences spref_fcm = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
-                    fcmTokenSent = spref_fcm.getBoolean("fcmTokenSent",false);
-                    if(!fcmTokenSent) {
-                        SharedPreferences sharedPreferences = getSharedPreferences("fcmToken",MODE_PRIVATE);
-                        fcmToken = sharedPreferences.getString("fcmToken","");
-                        System.out.println("....sending fcm token = "+fcmToken);
-                        SharedPreferences spref = getSharedPreferences(clickedProductHashID,MODE_PRIVATE);
-                        emailID = spref.getString("email","");
-                        System.out.println("....sending email ID = "+emailID);
+                    SharedPreferences spref_fcm = getSharedPreferences(clickedProductHashID, MODE_PRIVATE);
+                    fcmTokenSent = spref_fcm.getBoolean("fcmTokenSent", false);
+                    if (!fcmTokenSent) {
+                        SharedPreferences sharedPreferences = getSharedPreferences("fcmToken", MODE_PRIVATE);
+                        fcmToken = sharedPreferences.getString("fcmToken", "");
+                        System.out.println("....sending fcm token = " + fcmToken);
+                        SharedPreferences spref = getSharedPreferences(clickedProductHashID, MODE_PRIVATE);
+                        emailID = spref.getString("email", "");
+                        System.out.println("....sending email ID = " + emailID);
                         dOut.writeUTF(fcmToken);
                         dOut.flush();
                         //fcmTokenSent = true;
@@ -443,7 +473,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
 
-                    if(i == 2 || i==6)
+                    if (i == 2 || i == 6)
                         validate1Done = 1;
                     else {
                         onLoginFailed();
@@ -456,6 +486,7 @@ public class LoginActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (NullPointerException n) {
                     n.printStackTrace();
+                    return;
                 }
             }
         }).start();
@@ -479,7 +510,6 @@ public class LoginActivity extends AppCompatActivity {
             checked = false;
         } else
             _passwordText.setError(null);
-
         //System.out.println(".........credentials validated");
 
         return checked;

@@ -361,8 +361,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void logoutClicked(View view) {
-        SharedPreferences loggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        loggedIn.edit().putBoolean("auto_login",false).apply();
+        SharedPreferences spref = getSharedPreferences(LoginActivity.clickedProductHashID,MODE_PRIVATE);
+        spref.edit().putBoolean("loggedIn", false).apply();
         Toast.makeText(view.getContext(), "Logged out", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
         startActivity(intent);

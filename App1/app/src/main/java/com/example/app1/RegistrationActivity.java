@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,7 +24,7 @@ import java.util.Set;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    public static String serverName = "13.233.111.181";
+    public static String serverName = "13.235.19.8";
     public static RecyclerView productView;
     public static String clickedItem;
     /*public static List<Product> allProducts = new ArrayList<>();
@@ -61,7 +62,7 @@ public class RegistrationActivity extends AppCompatActivity {
         /*productNameList = spref_list.getStringSet("productNameList",new HashSet<String>());
         hashIDList = spref_list.getStringSet("hashIDList",new HashSet<String>());*/
 
-        System.out.println("hashIDList = "+hashIDList);
+        System.out.println("RA onCreate : hashIDList = "+hashIDList + " ProductName = " + productNameList);
 
         //REFRESH HashIDList and ProductNameList !!!!!!!!!!!!
         /*hashIDList = new HashSet<>();
@@ -72,20 +73,24 @@ public class RegistrationActivity extends AppCompatActivity {
         edit.putStringSet("productNameList",productNameList);
         edit.apply();*/
 
-        SharedPreferences preferences = getSharedPreferences(hashIDList,MODE_APPEND);
-        String n = preferences.getString("name",null);
-        String h = preferences.getString("hashID",null);
-        String u = preferences.getString("username",null);
-        String pa = preferences.getString("password",null);
-        Boolean li = preferences.getBoolean("loggedIn",false);
-        System.out.println("name = "+n+" hashID = "+h+" username = "+u+" password = "+pa+" logged in = "+li);
-        Product p = new Product(n,h);
-        p.setName(n);
-        p.setHashID(h);
-        p.setUsername(u);
-        p.setPassword(pa);
-        p.setIfLoggedIn(li);
-        allProducts.add(p);
+        allProducts = new ArrayList<>();
+        if(hashIDList!= null){
+            SharedPreferences preferences = getSharedPreferences(hashIDList,MODE_APPEND);
+            String n = preferences.getString("name",null);
+            String h = preferences.getString("hashID",null);
+            String u = preferences.getString("username",null);
+            String pa = preferences.getString("password",null);
+            Boolean li = preferences.getBoolean("loggedIn",false);
+            System.out.println("name = "+n+" hashID = "+h+" username = "+u+" password = "+pa+" logged in = "+li);
+            Product p = new Product(n,h);
+            p.setName(n);
+            p.setHashID(h);
+            p.setUsername(u);
+            p.setPassword(pa);
+            p.setIfLoggedIn(li);
+            allProducts.add(p);
+        }
+
 
         System.out.println("allProducts = "+allProducts);
 
@@ -94,19 +99,27 @@ public class RegistrationActivity extends AppCompatActivity {
         product.setPassword("qwer");
         product.setIfLoggedIn(true);
         allProducts.add(product);*/
-
+        // TODO: 22-06-2019 if logout button is pressed set product adapter
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.addProduct);
         if(allProducts.size()>0){
-            System.out.println(".......Products are there.........");
+            System.out.println(".......Products are there........." );
             fab.setVisibility(View.INVISIBLE);
             if(!allProducts.get(0).getIfLoggedIn()){
-                productView.setVisibility(View.VISIBLE);
-                ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
-                productView.setAdapter(mAdapter);
+                System.out.println("PRODUCT NOT LOGGED IN");
             }else {
+                System.out.println("DIRECT LOGIN");
+                proceed();
                 //TODO Direct login
             }
+            /*int size = allProducts.size();
+            System.out.println("SIZE : " + size + " " + allProducts.get(0).getHashID() + " " + allProducts.get(1).getHashID());
+            */
+            productView.setVisibility(View.VISIBLE);
+            ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+            productView.setAdapter(mAdapter);
+
+
 
 
         }else {
@@ -126,6 +139,7 @@ public class RegistrationActivity extends AppCompatActivity {
     public void proceed(){
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         startActivityForResult(intent, 0);
+
         finish();
     }
 
@@ -143,62 +157,71 @@ public class RegistrationActivity extends AppCompatActivity {
         builder.create();
 
         builder.setPositiveButton("ADD PRODUCT", new DialogInterface.OnClickListener() {
+
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                System.out.println("ADD BUTTON ON CLICK");
                 final String name = nameField.getText().toString();
                 final String hashID = hashIDField.getText().toString();
                 final String email = emailIDField.getText().toString();
-
-                if(TextUtils.isEmpty(name)){
+                System.out.println("Entered Product : " + name + " " + hashID + " " + email);
+                if (TextUtils.isEmpty(name)) {
                     Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your reference name", Toast.LENGTH_LONG).show();
                     nameField.setError("Enter a reference name");
-                }else if(hashID.length() <= 0){
+                } else if (hashID.length() <= 0) {
                     Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your hashID", Toast.LENGTH_LONG).show();
                     hashIDField.setError("Enter a valid hashID");
-                }else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     Toast.makeText(RegistrationActivity.this, "Something went wrong. Check your email address", Toast.LENGTH_LONG).show();
                     emailIDField.setError("Enter a valid email address");
-                }else if(hashIDList.contains(hashID)){
-                    Toast.makeText(RegistrationActivity.this, "hashID already exists. Check again !", Toast.LENGTH_LONG).show();
-                    hashIDField.setError("hash ID already exists");
-                } else if(productNameList.contains(name)){
-                    Toast.makeText(RegistrationActivity.this, "Name already exists. Please choose another name !", Toast.LENGTH_LONG).show();
-                    nameField.setError("Reference name already exists");
-                } else{
+                /*} else if (hashIDList!=null){
+                    if(hashIDList.equals(hashID)) {
+                        Toast.makeText(RegistrationActivity.this, "hashID already exists. Check again !", Toast.LENGTH_LONG).show();
+                        hashIDField.setError("hash ID already exists");
+                    }
+                } else if (productNameList != null){
+                       if(productNameList.equals(name)) {
+                           Toast.makeText(RegistrationActivity.this, "Name already exists. Please choose another name !", Toast.LENGTH_LONG).show();
+                           nameField.setError("Reference name already exists");
+                       }*/
+                } else {
                     /*Product newProduct = new Product(name, hashID);
                     newProduct.setIfLoggedIn(false);
                     allProducts.add(newProduct);*/
+
                     productNameList = name;
                     hashIDList = hashID;
 
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor edit = sharedPreferences.edit();
-                    productSerialNo = sharedPreferences.getInt("serialNo",1);
+                    //SharedPreferences.Editor edit = sharedPreferences.edit();
+                    //productSerialNo = sharedPreferences.getInt("serialNo",1);
 
                     //TODO: store allProducts
-                    SharedPreferences.Editor editor = getSharedPreferences(hashID,MODE_PRIVATE).edit();
+                    SharedPreferences.Editor editor = getSharedPreferences(hashID, MODE_PRIVATE).edit();
                     editor.clear();
                     editor.putString("name", name);
-                    editor.putString("hashID",hashID);
-                    editor.putString("email",email);
-                    editor.putInt("serialNo",productSerialNo);
+                    editor.putString("hashID", hashID);
+                    editor.putString("email", email);
+                    editor.apply();
+
+                    /*editor.putInt("serialNo",productSerialNo);
                     editor.apply();
 
                     System.out.println("............serial number for new product = "+productSerialNo);
                     productSerialNo++;
 
                     edit.putInt("serialNo",productSerialNo);
-                    edit.apply();
+                    edit.apply();*/
 
                     SharedPreferences.Editor editor2 = spref_list.edit();
                     editor2.clear();
-                    editor2.putString("hashIDList",hashIDList);
-                    editor2.putString("productNameList",productNameList);
+                    editor2.putString("hashIDList", hashIDList);
+                    editor2.putString("productNameList", productNameList);
                     editor2.apply();
 
-                    System.out.println("hashIDList = "+hashIDList);
+                    System.out.println(" RA  adding : hashIDList = " + hashIDList + " ProductName = " + productNameList);
 
-                    Intent t= new Intent(RegistrationActivity.this,RegistrationActivity.class);
+                    Intent t = new Intent(RegistrationActivity.this, RegistrationActivity.class);
                     startActivity(t);
                     finish();
                     System.out.println("........product added........");

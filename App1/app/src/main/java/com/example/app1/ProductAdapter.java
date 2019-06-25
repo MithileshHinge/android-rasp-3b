@@ -195,8 +195,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
                 SharedPreferences.Editor editor2 = RegistrationActivity.spref_list.edit();
                 editor2.clear();
-                editor2.putString("hashIDList",RegistrationActivity.hashIDList);
-                editor2.putString("productNameList",RegistrationActivity.productNameList);
+                /*editor2.putString("hashIDList",RegistrationActivity.hashIDList);
+                editor2.putString("productNameList",RegistrationActivity.productNameList);*/
+                editor2.remove("hashIDList");
+                editor2.remove("productNameList");
                 editor2.apply();
 
                 SharedPreferences.Editor editor = context.getSharedPreferences(singleProduct.getHashID(),Context.MODE_PRIVATE).edit();
